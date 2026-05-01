@@ -674,38 +674,59 @@ const EMAILJS_TEMPLATE_ID  = 'TU_TEMPLATE_ID';     // Dashboard EmailJS → Emai
 const GAS_URL = 'TU_APPS_SCRIPT_URL';
 
 // ─── PREGUNTAS — 50 sobre Da Vinci ───────────────────────
-// Imágenes via Wikimedia Commons API — CORS abierto
-const BASE = 'https://commons.wikimedia.org/wiki/Special:FilePath/';
+// SVG ilustraciones inline — sin dependencias externas, carga instantánea
 const IMG = {
-  mona:      BASE + 'Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg',
-  vitruvio:  BASE + 'Da_Vinci_Vitruve_Luc_Viatour.jpg',
-  cena:      BASE + 'The_Last_Supper_-_Leonardo_Da_Vinci_-_High_Resolution_32x16.jpg',
-  autorret:  BASE + 'Leonardo_self_portrait.jpg',
-  virgen:    BASE + 'Leonardo_da_Vinci_-_The_Virgin_of_the_Rocks_(Louvre).jpg',
-  codex:     BASE + 'Leonardo_da_vinci,_Study_of_a_flying_machine.jpg',
-  anatomia:  BASE + 'Da_Vinci_Studies_of_Embryos_Luc_Viatour.jpg',
-  helicop:   BASE + 'Leonardo_da_Vinci_helicopter.jpg',
-  amboise:   BASE + 'Amboise_Chateau_Royal.jpg',
-  sforza:    BASE + 'Portrait_of_Ludovico_Sforza.jpg',
-  vinci:     BASE + 'Annunciation_(Leonardo).jpg',
-  florencia: BASE + 'Ponte_Vecchio_(Florence).jpg',
-  renacer:   BASE + 'Leonardo_da_Vinci_-_Saint_John_the_Baptist_c.1513-1516.jpg',
-  museo:     BASE + 'Louvre_Museum_Wikimedia_Commons.jpg',
+  mona:     'svg:mona',
+  vitruvio: 'svg:vitruvio',
+  cena:     'svg:cena',
+  autorret: 'svg:autorret',
+  virgen:   'svg:virgen',
+  codex:    'svg:codex',
+  anatomia: 'svg:anatomia',
+  helicop:  'svg:helicop',
+  amboise:  'svg:amboise',
+  sforza:   'svg:sforza',
+  florencia:'svg:florencia',
+  renacer:  'svg:renacer',
+  museo:    'svg:museo',
+  vinci:    'svg:vinci',
 };
 
-// Fallback si la imagen no carga
-function imgErr(el) {
-  el.style.display='none';
-  const wrap = el.parentElement;
-  wrap.style.background='linear-gradient(135deg,#1a0f06 0%,#2a1a0a 100%)';
-  if(!wrap.querySelector('.img-fallback')) {
-    const fb = document.createElement('div');
-    fb.className='img-fallback';
-    fb.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.25;';
-    fb.innerHTML=`<svg viewBox="0 0 120 80" width="120" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="100" height="60" rx="2" stroke="#c8a96e" stroke-width="1"/><circle cx="35" cy="30" r="8" stroke="#c8a96e" stroke-width="1"/><path d="M10 55 L35 35 L55 50 L75 30 L110 55" stroke="#c8a96e" stroke-width="1" fill="none"/></svg>`;
-    wrap.appendChild(fb);
-  }
+const SVG = {
+  mona:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#1a0f06"/><rect x="110" y="20" width="100" height="160" rx="2" fill="#2a1a0a" stroke="#c8a96e" stroke-width="0.5"/><ellipse cx="160" cy="70" rx="28" ry="32" fill="#c4956a" opacity=".7"/><path d="M132 110 Q160 95 188 110 L195 180 H125 Z" fill="#3a2010" opacity=".8"/><path d="M125 75 Q160 55 195 75" stroke="#c8a96e" stroke-width="0.5" fill="none" opacity=".4"/><text x="160" y="195" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">La Gioconda · c.1503</text></svg>`,
+  vitruvio:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#120a04"/><circle cx="160" cy="95" r="70" fill="none" stroke="#c8a96e" stroke-width="0.8" opacity=".4"/><rect x="105" y="40" width="110" height="110" fill="none" stroke="#c8a96e" stroke-width="0.8" opacity=".3"/><ellipse cx="160" cy="68" rx="14" ry="16" fill="#c4956a" opacity=".5"/><line x1="90" y1="100" x2="230" y2="100" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><line x1="160" y1="30" x2="160" y2="170" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><line x1="100" y1="55" x2="220" y2="145" stroke="#c8a96e" stroke-width="0.3" opacity=".3"/><line x1="220" y1="55" x2="100" y2="145" stroke="#c8a96e" stroke-width="0.3" opacity=".3"/><text x="160" y="193" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Hombre de Vitruvio · c.1490</text></svg>`,
+  cena:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#110a04"/><rect x="20" y="60" width="280" height="110" rx="1" fill="#1e1208" stroke="#c8a96e" stroke-width="0.5" opacity=".4"/><line x1="20" y1="120" x2="300" y2="120" stroke="#c8a96e" stroke-width="0.3" opacity=".3"/><circle cx="160" cy="95" r="10" fill="#c4956a" opacity=".5"/><circle cx="100" cy="95" r="7" fill="#c4956a" opacity=".35"/><circle cx="130" cy="95" r="7" fill="#c4956a" opacity=".35"/><circle cx="190" cy="95" r="7" fill="#c4956a" opacity=".35"/><circle cx="220" cy="95" r="7" fill="#c4956a" opacity=".35"/><circle cx="70" cy="95" r="7" fill="#c4956a" opacity=".3"/><circle cx="250" cy="95" r="7" fill="#c4956a" opacity=".3"/><rect x="30" y="110" width="260" height="8" fill="#2a1a08" opacity=".6"/><text x="160" y="185" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">La Última Cena · Milán 1495</text></svg>`,
+  autorret:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0f0804"/><ellipse cx="160" cy="85" rx="35" ry="42" fill="#c4956a" opacity=".4"/><ellipse cx="160" cy="68" rx="22" ry="24" fill="#c4956a" opacity=".5"/><path d="M125 130 Q160 110 195 130 L205 190 H115 Z" fill="#2a1a0a" opacity=".7"/><path d="M115 80 Q130 65 160 60 Q190 65 205 80 Q210 110 195 130 Q160 150 125 130 Q110 110 115 80Z" fill="none" stroke="#c8a96e" stroke-width="0.4" opacity=".2"/><text x="160" y="197" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Autorretrato · c.1512</text></svg>`,
+  virgen:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0d0a06"/><path d="M0 200 Q80 120 160 100 Q240 120 320 200Z" fill="#1a1408" opacity=".8"/><path d="M60 200 Q100 140 160 110 Q220 140 260 200" fill="#141006" opacity=".6"/><ellipse cx="120" cy="100" rx="16" ry="18" fill="#c4956a" opacity=".45"/><ellipse cx="200" cy="115" rx="12" ry="14" fill="#c4956a" opacity=".35"/><ellipse cx="160" cy="130" rx="10" ry="12" fill="#c4956a" opacity=".3"/><circle cx="250" cy="40" r="20" fill="#1a1200" stroke="#c8a96e" stroke-width="0.5" opacity=".3"/><text x="160" y="195" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">La Virgen de las Rocas</text></svg>`,
+  codex:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#110a04"/><rect x="30" y="20" width="260" height="160" rx="2" fill="#1e1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><line x1="50" y1="50" x2="200" y2="50" stroke="#c8a96e" stroke-width="0.4" opacity=".4"/><line x1="50" y1="65" x2="180" y2="65" stroke="#c8a96e" stroke-width="0.4" opacity=".3"/><line x1="50" y1="80" x2="220" y2="80" stroke="#c8a96e" stroke-width="0.4" opacity=".3"/><path d="M220 45 Q270 60 260 90 Q250 120 230 110 Q210 100 215 75 Q220 55 240 50Z" fill="none" stroke="#c8a96e" stroke-width="0.6" opacity=".5"/><path d="M230 60 L260 55 L255 85" stroke="#c8a96e" stroke-width="0.4" fill="none" opacity=".4"/><text x="160" y="193" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Cuadernos de Da Vinci · c.1490</text></svg>`,
+  anatomia:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0d0804"/><ellipse cx="160" cy="75" rx="25" ry="30" fill="none" stroke="#c8a96e" stroke-width="0.7" opacity=".5"/><path d="M135 105 Q140 130 135 165" stroke="#c8a96e" stroke-width="0.6" fill="none" opacity=".4"/><path d="M185 105 Q180 130 185 165" stroke="#c8a96e" stroke-width="0.6" fill="none" opacity=".4"/><path d="M135 105 Q160 115 185 105" stroke="#c8a96e" stroke-width="0.6" fill="none" opacity=".4"/><path d="M145 105 Q130 125 110 130" stroke="#c8a96e" stroke-width="0.5" fill="none" opacity=".35"/><path d="M175 105 Q190 125 210 130" stroke="#c8a96e" stroke-width="0.5" fill="none" opacity=".35"/><ellipse cx="160" cy="125" rx="18" ry="22" fill="none" stroke="#c8a96e" stroke-width="0.5" opacity=".35"/><text x="160" y="193" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Estudios anatómicos · c.1510</text></svg>`,
+  helicop:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0f0a04"/><ellipse cx="160" cy="100" rx="6" ry="6" fill="#c8a96e" opacity=".6"/><path d="M160 100 L160 30" stroke="#c8a96e" stroke-width="0.8" opacity=".5"/><ellipse cx="160" cy="28" rx="80" ry="12" fill="none" stroke="#c8a96e" stroke-width="0.7" opacity=".5" transform="rotate(-15 160 28)"/><ellipse cx="160" cy="28" rx="80" ry="12" fill="none" stroke="#c8a96e" stroke-width="0.7" opacity=".3" transform="rotate(45 160 28)"/><path d="M154 100 L130 160 L160 150 L190 160 L166 100Z" fill="#1e1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><path d="M160 150 L160 180" stroke="#c8a96e" stroke-width="0.6" opacity=".4"/><path d="M140 180 L180 180" stroke="#c8a96e" stroke-width="0.6" opacity=".4"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Tornillo aéreo · c.1489</text></svg>`,
+  amboise:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0a0806"/><rect x="0" y="130" width="320" height="70" fill="#0f0a06"/><rect x="60" y="60" width="200" height="80" fill="#1a1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><rect x="80" y="40" width="20" height="30" fill="#1e1408" stroke="#c8a96e" stroke-width="0.4" opacity=".5"/><rect x="220" y="40" width="20" height="30" fill="#1e1408" stroke="#c8a96e" stroke-width="0.4" opacity=".5"/><rect x="145" y="30" width="30" height="40" fill="#1e1408" stroke="#c8a96e" stroke-width="0.4" opacity=".5"/><path d="M145 30 L160 15 L175 30" fill="#2a1a08" stroke="#c8a96e" stroke-width="0.4" opacity=".5"/><rect x="100" y="100" width="15" height="40" fill="#0f0a06"/><rect x="140" y="100" width="15" height="40" fill="#0f0a06"/><rect x="205" y="100" width="15" height="40" fill="#0f0a06"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Castillo de Amboise · Francia</text></svg>`,
+  sforza:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#100a04"/><rect x="90" y="15" width="140" height="170" rx="1" fill="#1a1008" stroke="#c8a96e" stroke-width="0.5" opacity=".4"/><ellipse cx="160" cy="70" rx="30" ry="35" fill="#c4956a" opacity=".45"/><ellipse cx="160" cy="55" rx="20" ry="22" fill="#c4956a" opacity=".5"/><path d="M130 110 Q160 95 190 110 L200 185 H120 Z" fill="#2a1808" opacity=".7"/><rect x="100" y="18" width="120" height="8" fill="#3a2010" opacity=".6"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Ludovico Sforza · Duque de Milán</text></svg>`,
+  florencia:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0d0906"/><path d="M0 200 L0 120 Q80 100 160 115 Q240 100 320 120 L320 200Z" fill="#140e08"/><rect x="50" y="80" width="40" height="60" fill="#1a1208" stroke="#c8a96e" stroke-width="0.4" opacity=".4"/><rect x="130" y="60" width="60" height="80" fill="#1e1408" stroke="#c8a96e" stroke-width="0.4" opacity=".5"/><path d="M130 60 L160 35 L190 60" fill="#2a1a08" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><rect x="230" y="90" width="40" height="50" fill="#1a1208" stroke="#c8a96e" stroke-width="0.4" opacity=".4"/><rect x="145" y="95" width="30" height="45" fill="#0d0904"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Florencia · Toscana</text></svg>`,
+  renacer:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0f0906"/><circle cx="160" cy="80" r="55" fill="none" stroke="#c8a96e" stroke-width="0.5" opacity=".3"/><ellipse cx="160" cy="70" rx="20" ry="22" fill="#c4956a" opacity=".45"/><path d="M140 95 Q160 85 180 95 L185 160 H135 Z" fill="#2a1808" opacity=".6"/><path d="M105 80 L60 60" stroke="#c8a96e" stroke-width="0.5" opacity=".3"/><path d="M215 80 L260 60" stroke="#c8a96e" stroke-width="0.5" opacity=".3"/><path d="M160 25 L160 10" stroke="#c8a96e" stroke-width="0.5" opacity=".4"/><path d="M150 12 L160 5 L170 12" fill="#c8a96e" opacity=".3"/><text x="160" y="193" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">El Renacimiento · s.XV</text></svg>`,
+  museo:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0a0806"/><rect x="20" y="80" width="280" height="100" fill="#141008" stroke="#c8a96e" stroke-width="0.5" opacity=".4"/><line x1="20" y1="80" x2="300" y2="80" stroke="#c8a96e" stroke-width="0.8" opacity=".5"/><path d="M20 80 L160 20 L300 80" fill="#1a1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><rect x="60" y="100" width="18" height="80" fill="#0a0806" opacity=".8"/><rect x="100" y="100" width="18" height="80" fill="#0a0806" opacity=".8"/><rect x="145" y="100" width="30" height="80" fill="#0a0806" opacity=".8"/><rect x="205" y="100" width="18" height="80" fill="#0a0806" opacity=".8"/><rect x="245" y="100" width="18" height="80" fill="#0a0806" opacity=".8"/><circle cx="160" cy="50" r="8" fill="#c8a96e" opacity=".4"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">Museo del Louvre · París</text></svg>`,
+  vinci:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0c0904"/><path d="M0 200 Q160 140 320 200Z" fill="#141008"/><ellipse cx="110" cy="85" rx="18" ry="20" fill="#c4956a" opacity=".4"/><path d="M92 108 Q110 95 128 108 L132 160 H88 Z" fill="#2a1808" opacity=".6"/><path d="M200 70 Q230 50 250 70 Q260 90 245 110 Q230 120 210 105 Q195 90 200 70Z" fill="#1a1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">La Anunciación · c.1472</text></svg>`,
+};
+
+// Renderizar SVG inline en el contenedor de imagen
+function renderQuestionImg(key) {
+  const wrap = document.getElementById('qImgWrap');
+  const imgEl = document.getElementById('qImg');
+  imgEl.style.display = 'none';
+  const prev = wrap.querySelector('.q-svg-render');
+  if(prev) prev.remove();
+  const div = document.createElement('div');
+  div.className = 'q-svg-render';
+  div.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+  const svgKey = key.replace('svg:','');
+  div.innerHTML = SVG[svgKey] || SVG.mona;
+  const svgEl = div.querySelector('svg');
+  if(svgEl) { svgEl.style.width='100%'; svgEl.style.height='100%'; }
+  wrap.appendChild(div);
 }
+
+function imgErr(el) { el.style.display='none'; }
 
 const ALL_QUESTIONS = [
   // 1-10
@@ -874,7 +895,7 @@ function loadQuestion() {
   document.getElementById('topScore').textContent = S.score;
 
   // Image
-  document.getElementById('qImg').src   = q.img;
+  renderQuestionImg(q.img);
   document.getElementById('qCaption').textContent = q.cap;
 
   // Text
