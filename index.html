@@ -674,22 +674,23 @@ const EMAILJS_TEMPLATE_ID  = 'TU_TEMPLATE_ID';     // Dashboard EmailJS → Emai
 const GAS_URL = 'TU_APPS_SCRIPT_URL';
 
 // ─── PREGUNTAS — 50 sobre Da Vinci ───────────────────────
-// Imágenes Unsplash — CORS abierto garantizado
+// Imágenes via Wikimedia Commons API — CORS abierto
+const BASE = 'https://commons.wikimedia.org/wiki/Special:FilePath/';
 const IMG = {
-  mona:      'https://images.unsplash.com/photo-1573521193826-58c7dc2e13e3?w=800&q=80',
-  vitruvio:  'https://images.unsplash.com/photo-1559628233-100c798642e4?w=800&q=80',
-  cena:      'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800&q=80',
-  autorret:  'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&q=80',
-  virgen:    'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=800&q=80',
-  codex:     'https://images.unsplash.com/photo-1544396821-4dd40b938ad3?w=800&q=80',
-  anatomia:  'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&q=80',
-  helicop:   'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80',
-  amboise:   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-  sforza:    'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&q=80',
-  vinci:     'https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80',
-  florencia: 'https://images.unsplash.com/photo-1534445538923-ab38fddec4c8?w=800&q=80',
-  renacer:   'https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?w=800&q=80',
-  museo:     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+  mona:      BASE + 'Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg',
+  vitruvio:  BASE + 'Da_Vinci_Vitruve_Luc_Viatour.jpg',
+  cena:      BASE + 'The_Last_Supper_-_Leonardo_Da_Vinci_-_High_Resolution_32x16.jpg',
+  autorret:  BASE + 'Leonardo_self_portrait.jpg',
+  virgen:    BASE + 'Leonardo_da_Vinci_-_The_Virgin_of_the_Rocks_(Louvre).jpg',
+  codex:     BASE + 'Leonardo_da_vinci,_Study_of_a_flying_machine.jpg',
+  anatomia:  BASE + 'Da_Vinci_Studies_of_Embryos_Luc_Viatour.jpg',
+  helicop:   BASE + 'Leonardo_da_Vinci_helicopter.jpg',
+  amboise:   BASE + 'Amboise_Chateau_Royal.jpg',
+  sforza:    BASE + 'Portrait_of_Ludovico_Sforza.jpg',
+  vinci:     BASE + 'Annunciation_(Leonardo).jpg',
+  florencia: BASE + 'Ponte_Vecchio_(Florence).jpg',
+  renacer:   BASE + 'Leonardo_da_Vinci_-_Saint_John_the_Baptist_c.1513-1516.jpg',
+  museo:     BASE + 'Louvre_Museum_Wikimedia_Commons.jpg',
 };
 
 // Fallback si la imagen no carga
