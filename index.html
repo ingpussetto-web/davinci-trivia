@@ -585,7 +585,7 @@ body::after {
       <div class="q-avatar"><img id="topAvatar" src="" alt=""></div>
       <span class="q-player-name" id="topName"></span>
     </div>
-    <div class="q-score-tag">Puntaje: <span id="topScore">0</span></div>
+    <div class="q-score-tag" id="scoreTag" style="visibility:hidden">Puntaje: <span id="topScore">0</span></div>
   </div>
   <div class="q-progress"><div class="q-progress-fill" id="qFill" style="width:0%"></div></div>
 
@@ -677,22 +677,53 @@ const GAS_URL = 'TU_APPS_SCRIPT_URL';
 // SVG ilustraciones inline — sin dependencias externas, carga instantánea
 const BASE_IMG = 'https://ingpussetto-web.github.io/davinci-trivia/img/';
 const IMG = {
-  // Imágenes reales en GitHub
-  virgen:   BASE_IMG + 'virgen.jpg',
-  helicop:  BASE_IMG + 'helicop.jpg',
+  claroscuro: BASE_IMG + 'claroscuro.jpg',
+  ciudad: BASE_IMG + 'ciudad.jpg',
+  caballo: BASE_IMG + 'caballo.jpg',
+  francisco: BASE_IMG + 'francisco.jpg',
+  medici: BASE_IMG + 'medici.jpg',
+  musica: BASE_IMG + 'musica.jpg',
+  nudo: BASE_IMG + 'nudo.jpg',
+  ginevra: BASE_IMG + 'ginevra.jpg',
+  bautista: BASE_IMG + 'bautista.jpg',
+  agua: BASE_IMG + 'agua.jpg',
+  alas: BASE_IMG + 'alas.jpg',
+  tanque: BASE_IMG + 'tanque.jpg',
+  maquina: BASE_IMG + 'maquina.jpg',
+  escultura: BASE_IMG + 'escultura.jpg',
+  pinceles: BASE_IMG + 'pinceles.jpg',
+  toscana: BASE_IMG + 'toscana.jpg',
+  venecia: BASE_IMG + 'venecia.jpg',
+  roma: BASE_IMG + 'roma.jpg',
+  milan: BASE_IMG + 'milan.jpg',
+  puente: BASE_IMG + 'puente.jpg',
+  salvator: BASE_IMG + 'salvator.jpg',
+  dama: BASE_IMG + 'dama.jpg',
+  vinci: BASE_IMG + 'vinci.jpg',
+  museo: BASE_IMG + 'museo.avif',
+  renacer: BASE_IMG + 'renacer.jpg',
+  amboise: BASE_IMG + 'amboise.jpg',
+  florencia: BASE_IMG + 'florencia.jpg',
+  sforza: BASE_IMG + 'sforza.jpg',
+  vitruvio: BASE_IMG + 'vitruvio.jpg',
+  mona: BASE_IMG + 'mona.jpg',
+  virgen: BASE_IMG + 'virgen.jpg',
+  helicop: BASE_IMG + 'helicop.jpg',
   anatomia: BASE_IMG + 'anatomia.jpg',
-  codex:    BASE_IMG + 'codex.jpg',
+  codex: BASE_IMG + 'codex.jpg',
   autorret: BASE_IMG + 'autorret.jpg',
-  cena:     BASE_IMG + 'cena.jpg',
-  // SVG fallback para las que faltan
-  mona:     'svg:mona',
-  vitruvio: 'svg:vitruvio',
-  amboise:  'svg:amboise',
-  sforza:   'svg:sforza',
-  florencia:'svg:florencia',
-  renacer:  'svg:renacer',
-  museo:    'svg:museo',
-  vinci:    'svg:vinci',
+  cena: BASE_IMG + 'cena.jpg',
+  perspectiva: 'svg:perspectiva',
+  subasta: 'svg:subasta',
+  pergamino: 'svg:pergamino',
+  compas: 'svg:compas',
+  nacimiento: 'svg:nacimiento',
+  rafael: 'svg:rafael',
+  miguel: 'svg:miguel',
+  verrocchio: 'svg:verrocchio',
+  taller: 'svg:taller',
+  diseccion: 'svg:diseccion',
+  embrion: 'svg:embrion',
 };
 
 const SVG = {
@@ -752,87 +783,159 @@ function renderQuestionImg(key) {
 function imgErr(el) { el.style.display='none'; }
 
 const ALL_QUESTIONS = [
-  // ── CON IMAGEN REAL ──────────────────────────────────────
-  { q:"¿Qué famoso fresco pintó Da Vinci en el refectorio de Santa Maria delle Grazie en Milán?",
-    img:IMG.cena, cap:"La Última Cena · Milán, 1495",
+  // ── BLOQUE 1: Con imagen real ─────────────────────────────
+  { q:"¿Qué famoso fresco pintó Da Vinci en el refectorio de Santa Maria delle Grazie?",
+    img:IMG.cena, cap:"La Última Cena · Milán, 1495", hasImg:true,
     opts:["La Creación de Adán","La Última Cena","El Juicio Final","La Escuela de Atenas"], ans:1 },
-
   { q:"¿En qué año nació Leonardo da Vinci?",
-    img:IMG.autorret, cap:"Autorretrato de Leonardo · c.1512",
+    img:IMG.autorret, cap:"Autorretrato · c.1512", hasImg:true,
     opts:["1442","1452","1460","1471"], ans:1 },
-
-  { q:"¿Qué característica tenía la escritura de Da Vinci en sus cuadernos de notas?",
-    img:IMG.codex, cap:"Cuadernos de Da Vinci · c.1490",
-    opts:["Usaba cifrado secreto","Escribía de derecha a izquierda en espejo","Usaba latín exclusivamente","Mezclaba tres idiomas"], ans:1 },
-
-  { q:"¿Qué estudio realizó Leonardo diseccionando más de 30 cadáveres humanos?",
-    img:IMG.anatomia, cap:"Estudios anatómicos · c.1510",
+  { q:"¿Qué característica tenía la escritura de Da Vinci en sus cuadernos?",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci · c.1490", hasImg:true,
+    opts:["Usaba cifrado secreto","Escribía en espejo de derecha a izquierda","Usaba latín exclusivamente","Mezclaba tres idiomas"], ans:1 },
+  { q:"¿Qué estudio realizó Leonardo diseccionando más de 30 cadáveres?",
+    img:IMG.anatomia, cap:"Estudios anatómicos · c.1510", hasImg:true,
     opts:["Anatomía animal","Anatomía humana","Geología","Botánica"], ans:1 },
-
   { q:"¿Cuál de estas máquinas diseñó Da Vinci como precursora del helicóptero?",
-    img:IMG.helicop, cap:"Tornillo aéreo · c.1489",
+    img:IMG.helicop, cap:"Tornillo aéreo · c.1489", hasImg:true,
     opts:["Ala delta","Tornillo aéreo","Planeador","Globo de aire caliente"], ans:1 },
-
   { q:"¿Quién encargó a Leonardo la pintura de La Virgen de las Rocas?",
-    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true,
     opts:["La familia Sforza","La Cofradía de la Inmaculada Concepción","El Papa Inocencio VIII","Lorenzo de Médici"], ans:1 },
-
-  // ── CON ILUSTRACIÓN SVG ───────────────────────────────────
   { q:"¿Cuál es el nombre completo de la pintura conocida como 'La Mona Lisa'?",
-    img:IMG.mona, cap:"La Gioconda · Museo del Louvre",
+    img:IMG.mona, cap:"La Gioconda · Museo del Louvre", hasImg:true,
     opts:["Retrato de Lisa","La Gioconda","Madonna Lisa","Ritratto di Donna"], ans:1 },
-
   { q:"¿Aproximadamente en qué año fue creado el 'Hombre de Vitruvio'?",
-    img:IMG.vitruvio, cap:"Hombre de Vitruvio · c.1490",
+    img:IMG.vitruvio, cap:"Hombre de Vitruvio · c.1490", hasImg:true,
     opts:["1480","1485","1490","1498"], ans:2 },
-
-  { q:"¿En qué ciudad falleció Leonardo da Vinci en 1519?",
-    img:IMG.amboise, cap:"Castillo de Amboise · Francia",
-    opts:["Florencia","Roma","Milán","Amboise"], ans:3 },
-
-  { q:"¿Cuántas obras pictóricas terminadas se le atribuyen a Da Vinci con certeza?",
-    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre",
-    opts:["Menos de 20","Entre 30 y 40","Más de 50","Exactamente 25"], ans:0 },
-
-  { q:"¿Qué técnica de Da Vinci crea transiciones suaves entre luces y sombras sin bordes definidos?",
-    img:IMG.mona, cap:"Detalle de La Gioconda",
-    opts:["Puntillismo","Sfumato","Chiaroscuro","Fresco"], ans:1 },
-
-  { q:"¿Cuántos apóstoles aparecen en La Última Cena?",
-    img:IMG.cena, cap:"La Última Cena · detalle",
-    opts:["10","11","12","13"], ans:2 },
-
-  { q:"¿Con qué mano escribía habitualmente Leonardo da Vinci?",
-    img:IMG.codex, cap:"Cuadernos de Da Vinci",
-    opts:["Mano derecha","Mano izquierda","Ambas manos","Dictaba a asistentes"], ans:1 },
-
-  { q:"¿Cuántos años vivió Leonardo da Vinci?",
-    img:IMG.autorret, cap:"Autorretrato · c.1512",
-    opts:["57","62","67","72"], ans:2 },
-
-  { q:"¿Qué rey francés fue mecenas de Da Vinci en sus últimos años de vida?",
-    img:IMG.amboise, cap:"Castillo real de Amboise",
-    opts:["Luis XII","Francisco I","Enrique II","Carlos VIII"], ans:1 },
-
-  { q:"¿Cuál de estos Codex de Leonardo se conserva en la Biblioteca Ambrosiana de Milán?",
-    img:IMG.codex, cap:"Cuadernos de Leonardo",
-    opts:["Codex Leicester","Codex Atlanticus","Codex Arundel","Codex Madrid"], ans:1 },
-
   { q:"¿Cuál fue el mecenas principal de Da Vinci durante su período en Milán?",
-    img:IMG.sforza, cap:"Ludovico Sforza · Duque de Milán",
+    img:IMG.sforza, cap:"Ludovico Sforza · Duque de Milán", hasImg:true,
     opts:["Lorenzo de Médici","Ludovico Sforza","Papa Julio II","Francesco Sforza"], ans:1 },
-
-  { q:"¿Cuál de estos inventos de Leonardo funcionó exitosamente durante su época?",
-    img:IMG.helicop, cap:"Diseños de Da Vinci",
-    opts:["Vehículo autopropulsado","Tornillo aéreo","Cañón de vapor","Ninguno llegó a construirse en vida"], ans:3 },
-
-  { q:"¿Qué tipo de perspectiva innovó Leonardo para dar profundidad atmosférica a sus paisajes?",
-    img:IMG.mona, cap:"Fondo de La Gioconda",
-    opts:["Perspectiva lineal","Perspectiva aérea (atmosférica)","Perspectiva isométrica","Perspectiva caballera"], ans:1 },
-
-  { q:"¿Qué precio récord alcanzó el 'Salvator Mundi' de Da Vinci en subasta en 2017?",
-    img:IMG.museo, cap:"Subasta Christie's · 2017",
+  { q:"¿En qué ciudad falleció Leonardo da Vinci en 1519?",
+    img:IMG.amboise, cap:"Castillo de Amboise · Francia", hasImg:true,
+    opts:["Florencia","Roma","Milán","Amboise"], ans:3 },
+  { q:"¿En qué ciudad de la Toscana nació Leonardo da Vinci?",
+    img:IMG.toscana, cap:"Toscana · Italia", hasImg:true,
+    opts:["Florencia","Siena","Vinci","Pisa"], ans:2 },
+  { q:"¿Qué rey francés fue mecenas de Da Vinci en sus últimos años?",
+    img:IMG.francisco, cap:"Francisco I · Rey de Francia", hasImg:true,
+    opts:["Luis XII","Francisco I","Enrique II","Carlos VIII"], ans:1 },
+  { q:"¿Dónde se exhibe actualmente la Mona Lisa?",
+    img:IMG.museo, cap:"Museo del Louvre · París", hasImg:true,
+    opts:["Museo degli Uffizi","Vaticano","Museo del Louvre","National Gallery"], ans:2 },
+  { q:"¿Cuál de estas obras también es de Da Vinci?",
+    img:IMG.dama, cap:"La Dama del Armiño · c.1489", hasImg:true,
+    opts:["El Nacimiento de Venus","La Dama del Armiño","La Primavera","La Pietà"], ans:1 },
+  { q:"¿Qué precio récord alcanzó el 'Salvator Mundi' en subasta en 2017?",
+    img:IMG.salvator, cap:"Salvator Mundi · Christie's 2017", hasImg:true,
     opts:["USD 150 millones","USD 290 millones","USD 450 millones","USD 600 millones"], ans:2 },
+  { q:"¿Qué instrumento musical tocaba con maestría Leonardo da Vinci?",
+    img:IMG.musica, cap:"Música en el Renacimiento", hasImg:true,
+    opts:["Clavicémbalo","Laúd","Violín","Flauta traversa"], ans:1 },
+  { q:"¿Qué retrato femenino pintó Da Vinci para la familia Benci de Florencia?",
+    img:IMG.ginevra, cap:"Ginevra de Benci · c.1476", hasImg:true,
+    opts:["La Gioconda","Ginevra de Benci","La Dama del Armiño","Cecilia Gallerani"], ans:1 },
+  { q:"¿Qué santo pintó Leonardo en una de sus últimas obras, mostrándolo señalando al cielo?",
+    img:IMG.bautista, cap:"San Juan Bautista · c.1513", hasImg:true,
+    opts:["San Marcos","San Juan Bautista","San Pedro","San Lucas"], ans:1 },
+  { q:"¿Qué estudió Da Vinci a través del movimiento y comportamiento del agua?",
+    img:IMG.agua, cap:"Estudios de agua · Da Vinci", hasImg:true,
+    opts:["Termodinámica","Hidrodinámica","Electrostática","Acústica"], ans:1 },
+  { q:"¿Cuál de estas máquinas de guerra diseñó Leonardo para el Duque Sforza?",
+    img:IMG.tanque, cap:"Vehículo blindado · c.1487", hasImg:true,
+    opts:["Submarino","Tanque blindado autopropulsado","Catapulta giratoria","Ballesta gigante"], ans:1 },
+  { q:"¿Qué diseño de Da Vinci anticipó el concepto del ala delta moderna?",
+    img:IMG.alas, cap:"Máquina voladora · c.1485", hasImg:true,
+    opts:["Tornillo aéreo","Ornitóptero (alas batientes)","Planeador de alas fijas","Globo de aire"], ans:1 },
+  { q:"¿Qué tipo de arma de guerra de largo alcance diseñó Leonardo en sus cuadernos?",
+    img:IMG.maquina, cap:"Máquinas de guerra · Da Vinci", hasImg:true,
+    opts:["Arcabuz de repetición","Cañón de vapor","Lanzallamas","Mortero giratorio"], ans:1 },
+  { q:"¿Cuál fue la primera ciudad donde Da Vinci trabajó como artista independiente?",
+    img:IMG.florencia, cap:"Florencia · Toscana", hasImg:true,
+    opts:["Milán","Venecia","Florencia","Roma"], ans:2 },
+  { q:"¿Cuántos años pasó Leonardo da Vinci trabajando en Milán bajo Ludovico Sforza?",
+    img:IMG.milan, cap:"Milán · s.XV", hasImg:true,
+    opts:["5 años","10 años","17 años","25 años"], ans:2 },
+  { q:"¿Qué tipo de escultura ecuestre monumental encargó Ludovico Sforza a Da Vinci?",
+    img:IMG.caballo, cap:"Estudios de caballos · Da Vinci", hasImg:true,
+    opts:["Una estatua de San Jorge","El Gran Caballo (Il Cavallo)","El caballo de Constantino","La cuadriga de Milán"], ans:1 },
+  { q:"¿Qué técnica pictórica de Da Vinci crea transiciones suaves entre luces y sombras?",
+    img:IMG.claroscuro, cap:"Técnica del claroscuro", hasImg:true,
+    opts:["Puntillismo","Sfumato","Chiaroscuro","Fresco"], ans:1 },
+  { q:"¿Qué diseñó Da Vinci para conectar Florencia con el mar Adriático?",
+    img:IMG.puente, cap:"Diseño de puente · Da Vinci", hasImg:true,
+    opts:["Un túnel subterráneo","Un canal artificial","Un puente colgante","Un acueducto elevado"], ans:1 },
+  { q:"¿Cuántas obras pictóricas terminadas se atribuyen a Da Vinci con certeza?",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true,
+    opts:["Menos de 20","Entre 30 y 40","Más de 50","Exactamente 25"], ans:0 },
+  { q:"¿Con quién aprendió Da Vinci el oficio de pintor en Florencia?",
+    img:IMG.pinceles, cap:"Taller renacentista · Florencia", hasImg:true,
+    opts:["Sandro Botticelli","Andrea del Verrocchio","Michelangelo","Rafael"], ans:1 },
+  { q:"¿Qué tipo de escultura en bronce creó el taller de Verrocchio donde trabajó Da Vinci?",
+    img:IMG.escultura, cap:"Escultura renacentista · s.XV", hasImg:true,
+    opts:["Figuras religiosas en mármol","Esculturas ecuestres en bronce","Bajorrelieves en terracota","Bustos en yeso"], ans:1 },
+  { q:"¿Qué familia florentina fue mecenas de las artes durante el Renacimiento?",
+    img:IMG.medici, cap:"Lorenzo de Médici · Florencia", hasImg:true,
+    opts:["Los Sforza","Los Médici","Los Borgia","Los Este"], ans:1 },
+  { q:"¿En qué ciudad italiana vivió Da Vinci brevemente antes de ir a Francia?",
+    img:IMG.roma, cap:"Roma · Italia", hasImg:true,
+    opts:["Nápoles","Génova","Roma","Bolonia"], ans:2 },
+  { q:"¿Qué república italiana visitó Da Vinci como embajador artístico en 1499?",
+    img:IMG.venecia, cap:"Venecia · República Serenísima", hasImg:true,
+    opts:["Génova","Florencia","Venecia","Pisa"], ans:2 },
+  { q:"¿Qué diseño decorativo complejo popularizó Leonardo como ejercicio mental?",
+    img:IMG.nudo, cap:"Diseño de nudos · Da Vinci", hasImg:true,
+    opts:["Arabescos islámicos","Nudos entrelazados (Vinci knots)","Mosaicos romanos","Frescos al secco"], ans:1 },
+  { q:"¿Qué obra de Da Vinci representa a Jesús con un orbe de cristal en su mano?",
+    img:IMG.salvator, cap:"Salvator Mundi · c.1500", hasImg:true,
+    opts:["San Juan Bautista","La Última Cena","Salvator Mundi","Cristo Redentor"], ans:2 },
+  { q:"¿Qué pueblo de la Toscana le dio el apellido a Leonardo?",
+    img:IMG.toscana, cap:"Toscana · tierra natal de Leonardo", hasImg:true,
+    opts:["Siena","Arezzo","Vinci","Lucca"], ans:2 },
+
+  // ── BLOQUE 2: SVG (preguntas sin imagen real aún) ─────────
+  { q:"¿Qué tipo de perspectiva innovó Leonardo para dar profundidad atmosférica a sus paisajes?",
+    img:IMG.mona, cap:"Fondo de La Gioconda", hasImg:true,
+    opts:["Perspectiva lineal","Perspectiva aérea (atmosférica)","Perspectiva isométrica","Perspectiva caballera"], ans:1 },
+  { q:"¿Cuántos apóstoles aparecen en La Última Cena?",
+    img:IMG.cena, cap:"La Última Cena · detalle", hasImg:true,
+    opts:["10","11","12","13"], ans:2 },
+  { q:"¿Qué personaje bíblico está en el centro exacto de La Última Cena?",
+    img:IMG.cena, cap:"La Última Cena · composición", hasImg:true,
+    opts:["San Juan","Jesucristo","San Pedro","Judas"], ans:1 },
+  { q:"¿Con qué mano escribía habitualmente Leonardo da Vinci?",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci", hasImg:true,
+    opts:["Mano derecha","Mano izquierda","Ambas manos","Dictaba a asistentes"], ans:1 },
+  { q:"¿Cuántos años vivió Leonardo da Vinci?",
+    img:IMG.autorret, cap:"Autorretrato · c.1512", hasImg:true,
+    opts:["57","62","67","72"], ans:2 },
+  { q:"¿Cuántos años tardó Da Vinci en completar La Mona Lisa?",
+    img:IMG.mona, cap:"La Gioconda · detalles", hasImg:true,
+    opts:["2 años","4 años","Al menos 12 años","Solo 6 meses"], ans:2 },
+  { q:"¿En qué año fue robada la Mona Lisa del Louvre?",
+    img:IMG.museo, cap:"Museo del Louvre · París", hasImg:true,
+    opts:["1894","1911","1925","1936"], ans:1 },
+  { q:"¿Cuál era la profesión del padre de Leonardo da Vinci?",
+    img:IMG.toscana, cap:"Vinci · Toscana", hasImg:true,
+    opts:["Comerciante","Notario","Médico","Sacerdote"], ans:1 },
+  { q:"¿Cuántas versiones de 'La Virgen de las Rocas' existen?",
+    img:IMG.virgen, cap:"La Virgen de las Rocas", hasImg:true,
+    opts:["Una","Dos","Tres","Cuatro"], ans:1 },
+  { q:"¿Dónde se conserva actualmente el Codex Leicester de Leonardo?",
+    img:IMG.codex, cap:"Codex Leicester", hasImg:true,
+    opts:["Museo Británico","Bill Gates (colección privada)","Biblioteca Vaticana","Louvre"], ans:1 },
+  { q:"¿Cuántas páginas de cuadernos de Da Vinci se conservan actualmente?",
+    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true,
+    opts:["500","3.500","7.000","15.000"], ans:1 },
+  { q:"¿Qué término filosófico describe mejor a Da Vinci?",
+    img:IMG.vitruvio, cap:"Hombre Universal", hasImg:true,
+    opts:["Escolástico","Uomo Universale","Condottiero","Humanista radical"], ans:1 },
+  { q:"¿Cuál de estos Codex se conserva en la Biblioteca Ambrosiana de Milán?",
+    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true,
+    opts:["Codex Leicester","Codex Atlanticus","Codex Arundel","Codex Madrid"], ans:1 },
+  { q:"¿Qué posición ocupaba Leonardo en el taller de Verrocchio?",
+    img:IMG.pinceles, cap:"Taller renacentista", hasImg:true,
+    opts:["Maestro principal","Aprendiz (garzone)","Contable","Escultor jefe"], ans:1 },
 ];
 
 const QUESTIONS_PER_GAME = 10;
@@ -919,7 +1022,15 @@ function checkReady() {
 function startGame() {
   S.name    = document.getElementById('inputName').value.trim();
   S.score   = 0; S.current = 0; S.answers = [];
-  S.questions = shuffle([...ALL_QUESTIONS]).slice(0, QUESTIONS_PER_GAME);
+  // Shuffle garantizando 50% con imagen real
+  const withImg  = shuffle(ALL_QUESTIONS.filter(q => q.hasImg && !q.img.startsWith('svg:')));
+  const withSvg  = shuffle(ALL_QUESTIONS.filter(q => !q.hasImg || q.img.startsWith('svg:')));
+  const minReal  = Math.ceil(QUESTIONS_PER_GAME * 0.5);
+  const realPick = withImg.slice(0, Math.min(minReal, withImg.length));
+  const svgPick  = withSvg.slice(0, QUESTIONS_PER_GAME - realPick.length);
+  // Fill remaining slots with real images if svgPick is short
+  const extra    = withImg.slice(realPick.length, realPick.length + (QUESTIONS_PER_GAME - realPick.length - svgPick.length));
+  S.questions    = shuffle([...realPick, ...svgPick, ...extra]);
 
   // Setup header
   document.getElementById('topName').textContent = S.name;
@@ -940,7 +1051,7 @@ function loadQuestion() {
   document.getElementById('qFill').style.width = pct+'%';
   document.getElementById('qNumBig').textContent = String(idx+1).padStart(2,'0');
   document.getElementById('qNumText').textContent = idx+1;
-  document.getElementById('topScore').textContent = S.score;
+  // Score hidden during game — shown at end
 
   // Image
   renderQuestionImg(q.img);
@@ -959,272 +1070,4 @@ function loadQuestion() {
     btn.className = 'q-opt';
     btn.dataset.idx = i;
     btn.dataset.correct = opt.isCorrect ? '1' : '0';
-    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span>${opt.text}`;
-    btn.onclick = () => selectOpt(btn, shuffled);
-    optsEl.appendChild(btn);
-  });
-
-  // Next button
-  const btnNext = document.getElementById('btnNext');
-  btnNext.classList.remove('visible');
-  btnNext.textContent = idx === QUESTIONS_PER_GAME-1 ? 'Ver resultado →' : 'Siguiente →';
-}
-
-function selectOpt(btn, shuffled) {
-  if(S.answered) return;
-  S.answered = true;
-
-  // Mark selected (no reveal correct/wrong)
-  document.querySelectorAll('.q-opt').forEach(b => b.classList.add('disabled'));
-  btn.classList.add('selected');
-
-  const isCorrect = btn.dataset.correct === '1';
-  if(isCorrect) S.score++;
-
-  // Record answer
-  const q = S.questions[S.current];
-  S.answers.push({
-    pregunta: q.q,
-    respondida: btn.textContent.trim(),
-    correcta: isCorrect,
-    puntaje: isCorrect ? 1 : 0
-  });
-
-  document.getElementById('topScore').textContent = S.score;
-  document.getElementById('btnNext').classList.add('visible');
-}
-
-function nextQuestion() {
-  S.current++;
-  if(S.current < QUESTIONS_PER_GAME) {
-    loadQuestion();
-  } else {
-    showEmailScreen();
-  }
-}
-
-// ══════════════════════════════════════════════════
-//  EMAIL SCREEN
-// ══════════════════════════════════════════════════
-function showEmailScreen() {
-  document.getElementById('emailScore').textContent = S.score;
-  document.getElementById('emailTotal').textContent = QUESTIONS_PER_GAME;
-  showScreen('s-email');
-}
-
-async function sendEmail() {
-  const email = document.getElementById('inputEmail').value.trim();
-  if(!email || !email.includes('@')) { toast('Ingresá un email válido'); return; }
-  S.email = email;
-
-  const btn = document.getElementById('btnSendEmail');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div>';
-
-  // Build answers text
-  const detalle = S.answers.map((a,i)=>
-    `${i+1}. ${a.pregunta}\n   → ${a.respondida} ${a.correcta?'✓':'✗'}`
-  ).join('\n\n');
-
-  const pct = Math.round(S.score/QUESTIONS_PER_GAME*100);
-
-  try {
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      to_email:   email,
-      to_name:    S.name,
-      puntaje:    S.score,
-      total:      QUESTIONS_PER_GAME,
-      porcentaje: pct + '%',
-      detalle:    detalle,
-      fecha:      new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'long',year:'numeric'})
-    });
-    toast('✓ Resultado enviado a '+email);
-  } catch(err) {
-    toast('No se pudo enviar el email. Continuando…');
-  }
-
-  await finishGame();
-}
-
-async function skipEmail() {
-  await finishGame();
-}
-
-// ══════════════════════════════════════════════════
-//  FINISH — SAVE & RANKING
-// ══════════════════════════════════════════════════
-async function finishGame() {
-  // Save to Google Sheets
-  const ids      = S.questions.map((_,i)=>i).join(',');
-  const respJSON = JSON.stringify(S.answers);
-  try {
-    const res = await fetch(GAS_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        action:    'saveResult',
-        nombre:    S.name,
-        email:     S.email,
-        puntaje:   S.score,
-        total:     QUESTIONS_PER_GAME,
-        ids,
-        respuestas: respJSON
-      })
-    });
-    const data = await res.json();
-    if(data.ok) S.ranking = data.ranking || [];
-  } catch(err) {
-    console.warn('GAS error:', err);
-    // Load local ranking if offline
-    S.ranking = JSON.parse(localStorage.getItem('dvRanking')||'[]');
-  }
-
-  // Update local cache
-  localStorage.setItem('dvRanking', JSON.stringify(S.ranking));
-
-  // Check if player is in top 10
-  const myRank = S.ranking.findIndex(r =>
-    r.nombre===S.name && parseInt(r.puntaje)===S.score
-  );
-
-  if(myRank !== -1 && myRank < 10) {
-    showRanking(myRank);
-  } else {
-    showNoTop();
-  }
-}
-
-// ══════════════════════════════════════════════════
-//  RANKING SCREEN (top 10 + player highlighted)
-// ══════════════════════════════════════════════════
-function showRanking(myRank) {
-  const list = document.getElementById('rkList');
-  list.innerHTML = '';
-
-  S.ranking.slice(0,10).forEach((r,i) => {
-    const isMe = (i === myRank);
-    const li = document.createElement('div');
-    li.className = 'rk-item' + (isMe?' me':'');
-    const posClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    const medal    = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-    li.innerHTML = `
-      <div class="rk-pos ${posClass}">${medal}</div>
-      <div class="rk-name">${r.nombre}${isMe?' <span style="color:var(--sepia);font-size:.8rem">← vos</span>':''}</div>
-      <div style="text-align:right">
-        <div class="rk-score">${r.puntaje}/${QUESTIONS_PER_GAME}</div>
-        <div class="rk-pct">${r.porcentaje||''}</div>
-      </div>
-    `;
-    list.appendChild(li);
-  });
-
-  const badge = document.getElementById('rkYouBadge');
-  badge.textContent = `¡Estás en el puesto #${myRank+1}!`;
-  badge.style.display = 'inline-block';
-
-  showScreen('s-ranking');
-  startCountdown('rkCountdown', 15, restart);
-}
-
-// ══════════════════════════════════════════════════
-//  NO TOP 10 SCREEN
-// ══════════════════════════════════════════════════
-function showNoTop() {
-  document.getElementById('notopScore').textContent = S.score;
-  document.getElementById('notopTotal').textContent = QUESTIONS_PER_GAME;
-
-  const pct = Math.round(S.score/QUESTIONS_PER_GAME*100);
-  let msg='', sub='';
-  if(pct>=80)      { msg='¡Excelente resultado!'; sub='Muy cerca del Top 10. ¡Intentá de nuevo!'; }
-  else if(pct>=50) { msg='¡Buen intento!';        sub='Seguí aprendiendo sobre el Maestro.'; }
-  else             { msg='Hay mucho por descubrir'; sub='Da Vinci tiene secretos infinitos.'; }
-
-  document.getElementById('notopMsg').textContent = msg;
-  document.getElementById('notopSub').textContent = sub;
-
-  // Mini ranking
-  const mini = document.getElementById('rkMiniList');
-  mini.innerHTML='';
-  S.ranking.slice(0,10).forEach((r,i)=>{
-    const li=document.createElement('li');
-    li.className='rk-item';
-    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-    li.innerHTML=`<div class="rk-pos ${i<3?['gold','silver','bronze'][i]:''}">${medal}</div><div class="rk-name">${r.nombre}</div><div class="rk-score">${r.puntaje}/${QUESTIONS_PER_GAME}</div>`;
-    mini.appendChild(li);
-  });
-
-  showScreen('s-notop');
-  startCountdown('notopCountdown', 10, restart);
-}
-
-// ══════════════════════════════════════════════════
-//  RESTART
-// ══════════════════════════════════════════════════
-function restart() {
-  clearInterval(countdownTimer);
-  stopCamera();
-
-  S = { name:'', photo:null, email:'', questions:[], current:0, score:0, answers:[], answered:false, ranking:[] };
-
-  // Reset welcome
-  document.getElementById('inputName').value = '';
-  document.getElementById('inputEmail').value = '';
-  const cv = document.getElementById('camVideo');
-  const cc = document.getElementById('camCanvas');
-  cv.style.display='none'; cc.style.display='none';
-  cc.getContext('2d').clearRect(0,0,300,300);
-  document.getElementById('camPlaceholder').style.display='flex';
-  document.getElementById('camCircle').classList.remove('has-photo');
-  document.getElementById('camCircle').onclick=startCamera;
-  document.getElementById('btnSnap').style.display='none';
-  document.getElementById('btnRetake').style.display='none';
-  document.getElementById('btnStart').disabled=true;
-  document.getElementById('topAvatar').src='';
-
-  showScreen('s-welcome');
-}
-
-// ══════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function shuffle(arr) {
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
-
-function shuffleOpts(opts, correctIdx) {
-  const tagged = opts.map((t,i)=>({text:t, isCorrect:i===correctIdx}));
-  return shuffle(tagged);
-}
-
-function startCountdown(elId, secs, cb) {
-  clearInterval(countdownTimer);
-  let rem = secs;
-  const el = document.getElementById(elId);
-  const update = () => {
-    if(!el) return;
-    el.textContent = `Volviendo al inicio en ${rem}s…`;
-    if(rem<=0){ clearInterval(countdownTimer); cb(); }
-    rem--;
-  };
-  update();
-  countdownTimer = setInterval(update, 1000);
-}
-
-function toast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-</script>
-</body>
-</html>
+    btn.innerHTML = `<span class
