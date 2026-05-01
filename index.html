@@ -675,15 +675,18 @@ const GAS_URL = 'TU_APPS_SCRIPT_URL';
 
 // ─── PREGUNTAS — 50 sobre Da Vinci ───────────────────────
 // SVG ilustraciones inline — sin dependencias externas, carga instantánea
+const BASE_IMG = 'https://ingpussetto-web.github.io/davinci-trivia/img/';
 const IMG = {
+  // Imágenes reales en GitHub
+  virgen:   BASE_IMG + 'virgen.jpg',
+  helicop:  BASE_IMG + 'helicop.jpg',
+  anatomia: BASE_IMG + 'anatomia.jpg',
+  codex:    BASE_IMG + 'codex.jpg',
+  autorret: BASE_IMG + 'autorret.jpg',
+  cena:     BASE_IMG + 'cena.jpg',
+  // SVG fallback para las que faltan
   mona:     'svg:mona',
   vitruvio: 'svg:vitruvio',
-  cena:     'svg:cena',
-  autorret: 'svg:autorret',
-  virgen:   'svg:virgen',
-  codex:    'svg:codex',
-  anatomia: 'svg:anatomia',
-  helicop:  'svg:helicop',
   amboise:  'svg:amboise',
   sforza:   'svg:sforza',
   florencia:'svg:florencia',
@@ -709,82 +712,127 @@ const SVG = {
   vinci:`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="200" fill="#0c0904"/><path d="M0 200 Q160 140 320 200Z" fill="#141008"/><ellipse cx="110" cy="85" rx="18" ry="20" fill="#c4956a" opacity=".4"/><path d="M92 108 Q110 95 128 108 L132 160 H88 Z" fill="#2a1808" opacity=".6"/><path d="M200 70 Q230 50 250 70 Q260 90 245 110 Q230 120 210 105 Q195 90 200 70Z" fill="#1a1208" stroke="#c8a96e" stroke-width="0.5" opacity=".5"/><text x="160" y="196" text-anchor="middle" fill="#c8a96e" font-size="9" opacity=".7" font-family="serif" font-style="italic">La Anunciación · c.1472</text></svg>`,
 };
 
-// Renderizar SVG inline en el contenedor de imagen
+// Renderizar imagen: real (URL) o SVG inline
 function renderQuestionImg(key) {
   const wrap = document.getElementById('qImgWrap');
   const imgEl = document.getElementById('qImg');
-  imgEl.style.display = 'none';
+  // Limpiar SVG previo
   const prev = wrap.querySelector('.q-svg-render');
   if(prev) prev.remove();
-  const div = document.createElement('div');
-  div.className = 'q-svg-render';
-  div.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
-  const svgKey = key.replace('svg:','');
-  div.innerHTML = SVG[svgKey] || SVG.mona;
-  const svgEl = div.querySelector('svg');
-  if(svgEl) { svgEl.style.width='100%'; svgEl.style.height='100%'; }
-  wrap.appendChild(div);
+
+  if(key && key.startsWith('svg:')) {
+    // SVG inline
+    imgEl.style.display = 'none';
+    const div = document.createElement('div');
+    div.className = 'q-svg-render';
+    div.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+    const svgKey = key.replace('svg:','');
+    div.innerHTML = SVG[svgKey] || SVG.mona;
+    const svgEl = div.querySelector('svg');
+    if(svgEl) { svgEl.style.width='100%'; svgEl.style.height='100%'; }
+    wrap.appendChild(div);
+  } else {
+    // Imagen real
+    imgEl.style.display = 'block';
+    imgEl.src = key;
+    imgEl.onerror = function() {
+      this.style.display='none';
+      // Fallback SVG genérico
+      const fb = document.createElement('div');
+      fb.className = 'q-svg-render';
+      fb.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+      fb.innerHTML = SVG.mona;
+      const svgEl = fb.querySelector('svg');
+      if(svgEl) { svgEl.style.width='100%'; svgEl.style.height='100%'; }
+      wrap.appendChild(fb);
+    };
+  }
 }
 
 function imgErr(el) { el.style.display='none'; }
 
 const ALL_QUESTIONS = [
-  // 1-10
-  { q:"¿En qué año nació Leonardo da Vinci?", img:IMG.autorret, cap:"Autorretrato, c.1512", opts:["1442","1452","1460","1471"], ans:1 },
-  { q:"¿En qué ciudad de la Toscana nació Leonardo?", img:IMG.florencia, cap:"Toscana, Italia", opts:["Florencia","Siena","Vinci","Pisa"], ans:2 },
-  { q:"¿Cuál es el nombre completo de la pintura conocida como 'La Mona Lisa'?", img:IMG.mona, cap:"La Gioconda, Museo del Louvre", opts:["Retrato de Lisa","La Gioconda","Madonna Lisa","Ritratto di Donna"], ans:1 },
-  { q:"¿Dónde se exhibe actualmente la Mona Lisa?", img:IMG.museo, cap:"Sala 711, Museo del Louvre", opts:["Museo degli Uffizi","Vaticano","Museo del Louvre","National Gallery"], ans:2 },
-  { q:"¿Qué famoso fresco pintó Da Vinci en el refectorio de Santa Maria delle Grazie?", img:IMG.cena, cap:"La Última Cena, Milán", opts:["La Creación de Adán","La Última Cena","El Juicio Final","La Escuela de Atenas"], ans:1 },
-  { q:"¿Aproximadamente en qué año fue creado el 'Hombre de Vitruvio'?", img:IMG.vitruvio, cap:"Hombre de Vitruvio, c.1490", opts:["1480","1485","1490","1498"], ans:2 },
-  { q:"¿Cuál fue el mecenas principal de Da Vinci durante su período en Milán?", img:IMG.sforza, cap:"Ludovico Sforza", opts:["Lorenzo de Médici","Ludovico Sforza","Papa Julio II","Francesco Sforza"], ans:1 },
-  { q:"¿En qué ciudad falleció Leonardo da Vinci en 1519?", img:IMG.amboise, cap:"Castillo de Amboise, Francia", opts:["Florencia","Roma","Milán","Amboise"], ans:3 },
-  { q:"¿Cuántas obras pictóricas terminadas se le atribuyen a Da Vinci con certeza?", img:IMG.virgen, cap:"La Virgen de las Rocas, Louvre", opts:["Menos de 20","Entre 30 y 40","Más de 50","Exactamente 25"], ans:0 },
-  { q:"¿Qué característica tenía la escritura de Da Vinci en sus cuadernos?", img:IMG.codex, cap:"Cuadernos de Da Vinci", opts:["Usaba cifrado secreto","Escribía de derecha a izquierda en espejo","Usaba latín exclusivamente","Mezclaba idiomas"], ans:1 },
-  // 11-20
-  { q:"¿Con quién aprendió Da Vinci el oficio de pintor en Florencia?", img:IMG.florencia, cap:"Taller de Andrea del Verrocchio, Florencia", opts:["Sandro Botticelli","Andrea del Verrocchio","Michelangelo","Rafael"], ans:1 },
-  { q:"¿Cuál de estas obras es también de Da Vinci?", img:IMG.virgen, cap:"La Virgen de las Rocas", opts:["El Nacimiento de Venus","La Virgen de las Rocas","La Primavera","La Pietà"], ans:1 },
-  { q:"¿Qué técnica pictórica era la preferida de Leonardo para crear transiciones suaves entre luces y sombras?", img:IMG.mona, cap:"Detalle de La Gioconda", opts:["Puntillismo","Sfumato","Chiaroscuro","Fresco"], ans:1 },
-  { q:"¿Aproximadamente cuántas páginas de cuadernos de Da Vinci se conservan actualmente?", img:IMG.codex, cap:"Cuadernos de Da Vinci", opts:["500","3.500","7.000","15.000"], ans:1 },
-  { q:"¿Cuál de estas áreas NO fue estudiada significativamente por Da Vinci?", img:IMG.anatomia, cap:"Estudios anatómicos", opts:["Anatomía humana","Astronomía avanzada","Geología","Óptica"], ans:1 },
-  { q:"¿Qué rey francés fue mecenas de Da Vinci en sus últimos años?", img:IMG.amboise, cap:"Castillo real de Amboise", opts:["Luis XII","Francisco I","Enrique II","Carlos VIII"], ans:1 },
-  { q:"¿Qué representa el 'Hombre de Vitruvio'?", img:IMG.vitruvio, cap:"Hombre de Vitruvio", opts:["Un soldado romano","Las proporciones ideales del cuerpo humano","Un estudio astronómico","El movimiento del agua"], ans:1 },
-  { q:"¿Cuál de estas máquinas diseñó Da Vinci como precursora del helicóptero?", img:IMG.helicop, cap:"Tornillo aéreo de Da Vinci", opts:["Ala delta","Tornillo aéreo","Planeador","Globo de aire caliente"], ans:1 },
-  { q:"¿En qué año comenzó Da Vinci a pintar La Última Cena?", img:IMG.cena, cap:"La Última Cena, detalle", opts:["1487","1490","1495","1501"], ans:2 },
-  { q:"¿Qué posición ocupaba Leonardo en el taller de Verrocchio?", img:IMG.autorret, cap:"Florencia, s.XV", opts:["Maestro principal","Aprendiz (garzone)","Contable","Escultor jefe"], ans:1 },
-  // 21-30
-  { q:"¿Cuál de estas obras retrata a Cecilia Gallerani, amante del Duque Sforza?", img:IMG.virgen, cap:"Obras de Leonardo", opts:["La Gioconda","La dama del armiño","La Virgen de las Rocas","Retrato de músico"], ans:1 },
-  { q:"¿Con qué mano escribía habitualmente Leonardo da Vinci?", img:IMG.codex, cap:"Cuadernos de Da Vinci", opts:["Mano derecha","Mano izquierda","Ambas manos","Dictaba a asistentes"], ans:1 },
-  { q:"¿Cuántos años vivió Leonardo da Vinci?", img:IMG.autorret, cap:"Autorretrato, c.1512", opts:["57","62","67","72"], ans:2 },
-  { q:"¿En qué ciudad de Italia pasó Da Vinci la mayor parte de su vida adulta?", img:IMG.sforza, cap:"Milán, s.XV", opts:["Florencia","Roma","Milán","Venecia"], ans:2 },
-  { q:"¿Qué término describe la técnica de Leonardo de registrar todo en cuadernos ilustrados?", img:IMG.anatomia, cap:"Estudios de embriones", opts:["Portfolio","Codex","Manuscrito iluminado","Tratado"], ans:1 },
-  { q:"¿Cuántos apóstoles aparecen en La Última Cena?", img:IMG.cena, cap:"La Última Cena, detalle central", opts:["10","11","12","13"], ans:2 },
-  { q:"¿Qué personaje bíblico está en el centro exacto de La Última Cena?", img:IMG.cena, cap:"La Última Cena, composición", opts:["San Juan","Jesucristo","San Pedro","Judas"], ans:1 },
-  { q:"¿Cuál fue la primera ciudad donde Da Vinci trabajó como artista independiente?", img:IMG.florencia, cap:"Toscana, Italia", opts:["Milán","Venecia","Florencia","Roma"], ans:2 },
-  { q:"¿Qué instrumento musical tocaba con maestría Leonardo da Vinci?", img:IMG.renacer, cap:"Leonardo, hombre del Renacimiento", opts:["Clavicémbalo","Laúd","Violín","Flauta traversa"], ans:1 },
-  { q:"¿De qué material está hecha principalmente La Última Cena?", img:IMG.cena, cap:"Detalle de La Última Cena", opts:["Óleo sobre tela","Tempera y aceite sobre yeso","Fresco sobre cal","Encáustica sobre tabla"], ans:1 },
-  // 31-40
-  { q:"¿Cuál de estos Codex de Leonardo se conserva en la Biblioteca Ambrosiana de Milán?", img:IMG.codex, cap:"Cuadernos de Leonardo", opts:["Codex Leicester","Codex Atlanticus","Codex Arundel","Codex Madrid"], ans:1 },
-  { q:"¿Qué estudio detallado realizó Leonardo diseccionando más de 30 cadáveres?", img:IMG.anatomia, cap:"Estudios anatómicos", opts:["Anatomía animal","Anatomía humana","Geología","Botánica"], ans:1 },
-  { q:"¿Qué pintor contemporáneo era rival artístico de Leonardo en Florencia?", img:IMG.florencia, cap:"Florencia renacentista", opts:["Tiziano","Rafael","Miguel Ángel","Botticelli"], ans:2 },
-  { q:"¿Cuál de estos inventos de Leonardo funcionó exitosamente en su época?", img:IMG.helicop, cap:"Diseños de Da Vinci", opts:["Vehículo autopropulsado","Tornillo aéreo","Cañón de vapor","Ninguno llegó a construirse"], ans:3 },
-  { q:"¿Qué simboliza el armiño en el retrato 'La Dama del Armiño'?", img:IMG.virgen, cap:"La Dama del Armiño, detalle", opts:["Riqueza","Pureza y moderación","Valentía","Sabiduría"], ans:1 },
-  { q:"¿Cuántos años tardó Da Vinci en completar La Mona Lisa?", img:IMG.mona, cap:"La Gioconda, detalles", opts:["2 años","4 años","Al menos 12 años","Solo 6 meses"], ans:2 },
-  { q:"¿Cuál de estos personajes retrató Da Vinci en su 'Salvador del Mundo' (Salvator Mundi)?", img:IMG.renacer, cap:"Obras de Leonardo", opts:["San Juan Bautista","Jesucristo","El Papa Alejandro VI","Lorenzo de Médici"], ans:1 },
-  { q:"¿En qué año fue robada la Mona Lisa del Louvre?", img:IMG.museo, cap:"Museo del Louvre, París", opts:["1894","1911","1925","1936"], ans:1 },
-  { q:"¿Cuál era el nombre del padre de Leonardo da Vinci?", img:IMG.vinci, cap:"Vinci, Toscana", opts:["Giovanni","Piero","Francesco","Lorenzo"], ans:1 },
-  { q:"¿Qué término filosófico del Renacimiento describe mejor a Da Vinci?", img:IMG.vitruvio, cap:"Hombre universal", opts:["Escolástico","Uomo Universale (Hombre Universal)","Condottiero","Humanista radical"], ans:1 },
-  // 41-50
-  { q:"¿Dónde se encuentra actualmente el Codex Leicester de Leonardo?", img:IMG.codex, cap:"Codex Leicester", opts:["Museo Británico","Bill Gates (colección privada)","Biblioteca Vaticana","Louvre"], ans:1 },
-  { q:"¿Qué rama de la física estudió Da Vinci al observar el movimiento del agua?", img:IMG.anatomia, cap:"Estudios de fluidos", opts:["Termodinámica","Hidrodinámica","Electrostática","Acústica"], ans:1 },
-  { q:"¿Quién encargó a Leonardo la pintura de La Virgen de las Rocas?", img:IMG.virgen, cap:"La Virgen de las Rocas", opts:["La familia Sforza","La Cofradía de la Inmaculada Concepción","El Papa Inocencio VIII","Lorenzo de Médici"], ans:1 },
-  { q:"¿Cuál fue el último proyecto de ingeniería en que trabajó Da Vinci?", img:IMG.amboise, cap:"Francia, últimos años", opts:["Un canal entre Milán y el mar","El drenaje de las marismas de la Sologne","Un puente sobre el Bósforo","Un observatorio astronómico"], ans:1 },
-  { q:"¿Qué tipo de perspectiva innovó Leonardo para dar profundidad atmosférica a sus paisajes?", img:IMG.mona, cap:"Fondo de La Gioconda", opts:["Perspectiva lineal","Perspectiva aérea (atmosférica)","Perspectiva isométrica","Perspectiva caballera"], ans:1 },
-  { q:"¿Cuántas versiones de 'La Virgen de las Rocas' existen?", img:IMG.virgen, cap:"La Virgen de las Rocas", opts:["Una","Dos","Tres","Cuatro"], ans:1 },
-  { q:"¿En qué material diseccionaba Leonardo los cuerpos para sus estudios anatómicos?", img:IMG.anatomia, cap:"Estudios de anatomía", opts:["Cera","Plomo fundido","Directamente en cadáveres","Arcilla modelada"], ans:2 },
-  { q:"¿Cómo se llama el método de Da Vinci de aplicar capas muy delgadas y translúcidas de pintura?", img:IMG.mona, cap:"Técnica pictórica", opts:["Imprimatura","Velatura","Grisalla","Encáustica"], ans:1 },
-  { q:"¿Qué tipo de puente innovador diseñó Leonardo que no fue construido hasta el siglo XXI?", img:IMG.helicop, cap:"Diseños de ingeniería", opts:["Puente colgante","Puente de arco sin clavija (autoportante)","Puente flotante","Puente de madera modular"], ans:1 },
-  { q:"¿Cuál era la profesión oficial del padre de Leonardo da Vinci?", img:IMG.vinci, cap:"Vinci, Toscana", opts:["Comerciante","Notario","Médico","Sacerdote"], ans:1 },
-  { q:"¿Qué precio récord alcanzó el 'Salvator Mundi' de Da Vinci en subasta en 2017?", img:IMG.museo, cap:"Subasta Christie's, 2017", opts:["USD 150 millones","USD 290 millones","USD 450.3 millones","USD 600 millones"], ans:2 },
+  // ── CON IMAGEN REAL ──────────────────────────────────────
+  { q:"¿Qué famoso fresco pintó Da Vinci en el refectorio de Santa Maria delle Grazie en Milán?",
+    img:IMG.cena, cap:"La Última Cena · Milán, 1495",
+    opts:["La Creación de Adán","La Última Cena","El Juicio Final","La Escuela de Atenas"], ans:1 },
+
+  { q:"¿En qué año nació Leonardo da Vinci?",
+    img:IMG.autorret, cap:"Autorretrato de Leonardo · c.1512",
+    opts:["1442","1452","1460","1471"], ans:1 },
+
+  { q:"¿Qué característica tenía la escritura de Da Vinci en sus cuadernos de notas?",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci · c.1490",
+    opts:["Usaba cifrado secreto","Escribía de derecha a izquierda en espejo","Usaba latín exclusivamente","Mezclaba tres idiomas"], ans:1 },
+
+  { q:"¿Qué estudio realizó Leonardo diseccionando más de 30 cadáveres humanos?",
+    img:IMG.anatomia, cap:"Estudios anatómicos · c.1510",
+    opts:["Anatomía animal","Anatomía humana","Geología","Botánica"], ans:1 },
+
+  { q:"¿Cuál de estas máquinas diseñó Da Vinci como precursora del helicóptero?",
+    img:IMG.helicop, cap:"Tornillo aéreo · c.1489",
+    opts:["Ala delta","Tornillo aéreo","Planeador","Globo de aire caliente"], ans:1 },
+
+  { q:"¿Quién encargó a Leonardo la pintura de La Virgen de las Rocas?",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre",
+    opts:["La familia Sforza","La Cofradía de la Inmaculada Concepción","El Papa Inocencio VIII","Lorenzo de Médici"], ans:1 },
+
+  // ── CON ILUSTRACIÓN SVG ───────────────────────────────────
+  { q:"¿Cuál es el nombre completo de la pintura conocida como 'La Mona Lisa'?",
+    img:IMG.mona, cap:"La Gioconda · Museo del Louvre",
+    opts:["Retrato de Lisa","La Gioconda","Madonna Lisa","Ritratto di Donna"], ans:1 },
+
+  { q:"¿Aproximadamente en qué año fue creado el 'Hombre de Vitruvio'?",
+    img:IMG.vitruvio, cap:"Hombre de Vitruvio · c.1490",
+    opts:["1480","1485","1490","1498"], ans:2 },
+
+  { q:"¿En qué ciudad falleció Leonardo da Vinci en 1519?",
+    img:IMG.amboise, cap:"Castillo de Amboise · Francia",
+    opts:["Florencia","Roma","Milán","Amboise"], ans:3 },
+
+  { q:"¿Cuántas obras pictóricas terminadas se le atribuyen a Da Vinci con certeza?",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre",
+    opts:["Menos de 20","Entre 30 y 40","Más de 50","Exactamente 25"], ans:0 },
+
+  { q:"¿Qué técnica de Da Vinci crea transiciones suaves entre luces y sombras sin bordes definidos?",
+    img:IMG.mona, cap:"Detalle de La Gioconda",
+    opts:["Puntillismo","Sfumato","Chiaroscuro","Fresco"], ans:1 },
+
+  { q:"¿Cuántos apóstoles aparecen en La Última Cena?",
+    img:IMG.cena, cap:"La Última Cena · detalle",
+    opts:["10","11","12","13"], ans:2 },
+
+  { q:"¿Con qué mano escribía habitualmente Leonardo da Vinci?",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci",
+    opts:["Mano derecha","Mano izquierda","Ambas manos","Dictaba a asistentes"], ans:1 },
+
+  { q:"¿Cuántos años vivió Leonardo da Vinci?",
+    img:IMG.autorret, cap:"Autorretrato · c.1512",
+    opts:["57","62","67","72"], ans:2 },
+
+  { q:"¿Qué rey francés fue mecenas de Da Vinci en sus últimos años de vida?",
+    img:IMG.amboise, cap:"Castillo real de Amboise",
+    opts:["Luis XII","Francisco I","Enrique II","Carlos VIII"], ans:1 },
+
+  { q:"¿Cuál de estos Codex de Leonardo se conserva en la Biblioteca Ambrosiana de Milán?",
+    img:IMG.codex, cap:"Cuadernos de Leonardo",
+    opts:["Codex Leicester","Codex Atlanticus","Codex Arundel","Codex Madrid"], ans:1 },
+
+  { q:"¿Cuál fue el mecenas principal de Da Vinci durante su período en Milán?",
+    img:IMG.sforza, cap:"Ludovico Sforza · Duque de Milán",
+    opts:["Lorenzo de Médici","Ludovico Sforza","Papa Julio II","Francesco Sforza"], ans:1 },
+
+  { q:"¿Cuál de estos inventos de Leonardo funcionó exitosamente durante su época?",
+    img:IMG.helicop, cap:"Diseños de Da Vinci",
+    opts:["Vehículo autopropulsado","Tornillo aéreo","Cañón de vapor","Ninguno llegó a construirse en vida"], ans:3 },
+
+  { q:"¿Qué tipo de perspectiva innovó Leonardo para dar profundidad atmosférica a sus paisajes?",
+    img:IMG.mona, cap:"Fondo de La Gioconda",
+    opts:["Perspectiva lineal","Perspectiva aérea (atmosférica)","Perspectiva isométrica","Perspectiva caballera"], ans:1 },
+
+  { q:"¿Qué precio récord alcanzó el 'Salvator Mundi' de Da Vinci en subasta en 2017?",
+    img:IMG.museo, cap:"Subasta Christie's · 2017",
+    opts:["USD 150 millones","USD 290 millones","USD 450 millones","USD 600 millones"], ans:2 },
 ];
 
 const QUESTIONS_PER_GAME = 10;
