@@ -730,7 +730,7 @@ const EMAILJS_SERVICE_ID   = 'TU_SERVICE_ID';      // Dashboard EmailJS → Emai
 const EMAILJS_TEMPLATE_ID  = 'TU_TEMPLATE_ID';     // Dashboard EmailJS → Email Templates
 
 // Google Apps Script Web App URL (pegá la URL después de deployar Code.gs)
-const GAS_URL = 'TU_APPS_SCRIPT_URL';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxPIVaFAyfgBqE8SRMybP00d3Yja9lfVKm5mbfNmZ3dyGyShha8K2431DPkj_RFg2ut/exec';
 
 // ─── PREGUNTAS — 50 sobre Da Vinci ───────────────────────
 // SVG ilustraciones inline — sin dependencias externas, carga instantánea
@@ -1081,7 +1081,7 @@ function checkReady() {
 // ══════════════════════════════════════════════════
 function startGame() {
   S.name    = document.getElementById('inputName').value.trim();
-  S.score   = 0; S.current = 0; S.answers = [];
+  S.score   = 0; S.current = 0; S.answers = []; S.startTime = Date.now();
   // Shuffle garantizando 50% con imagen real
   const withImg  = shuffle(ALL_QUESTIONS.filter(q => q.hasImg && !q.img.startsWith('svg:')));
   const withSvg  = shuffle(ALL_QUESTIONS.filter(q => !q.hasImg || q.img.startsWith('svg:')));
@@ -1234,6 +1234,7 @@ async function finishGame() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         action:    'saveResult',
+        tiempo:    Math.round((Date.now() - S.startTime) / 1000),
         nombre:    S.name,
         email:     S.email,
         puntaje:   S.score,
@@ -1254,6 +1255,7 @@ async function finishGame() {
   localStorage.setItem('dvRanking', JSON.stringify(S.ranking));
 
   // Check if player is in top 10
+  S.tiempo = Math.round((Date.now() - S.startTime) / 1000);
   const myRank = S.ranking.findIndex(r =>
     r.nombre===S.name && parseInt(r.puntaje)===S.score
   );
@@ -1268,6 +1270,13 @@ async function finishGame() {
 // ══════════════════════════════════════════════════
 //  RANKING SCREEN (top 10 + player highlighted)
 // ══════════════════════════════════════════════════
+function formatTiempo(secs) {
+  if(!secs) return '';
+  const m = Math.floor(secs/60);
+  const s = secs % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 function showRanking(myRank) {
   const list = document.getElementById('rkList');
   list.innerHTML = '';
@@ -1278,9 +1287,13 @@ function showRanking(myRank) {
     li.className = 'rk-item' + (isMe?' me':'');
     const posClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const medal    = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const tiempo   = r.tiempo ? `⏱ ${formatTiempo(parseInt(r.tiempo))}` : '';
     li.innerHTML = `
       <div class="rk-pos ${posClass}">${medal}</div>
-      <div class="rk-name">${r.nombre}${isMe?' <span style="color:var(--sepia);font-size:.8rem">← vos</span>':''}</div>
+      <div style="flex:1">
+        <div class="rk-name">${r.nombre}${isMe?' <span style="color:var(--sepia);font-size:.75rem"> ← vos</span>':''}</div>
+        <div style="font-size:.72rem;color:var(--faded)">${tiempo}</div>
+      </div>
       <div style="text-align:right">
         <div class="rk-score">${r.puntaje}/${QUESTIONS_PER_GAME}</div>
         <div class="rk-pct">${r.porcentaje||''}</div>
@@ -1289,12 +1302,50 @@ function showRanking(myRank) {
     list.appendChild(li);
   });
 
+  // Stats bar
+  const total = S.ranking.length;
+  const hoy   = S.ranking.filter(r => {
+    if(!r.ts) return false;
+    const d = new Date(r.ts);
+    const n = new Date();
+    return d.toDateString() === n.toDateString();
+  }).length;
+
   const badge = document.getElementById('rkYouBadge');
   badge.textContent = `¡Estás en el puesto #${myRank+1}!`;
   badge.style.display = 'inline-block';
 
+  // Stats below ranking
+  let statsEl = document.getElementById('rkStats');
+  if(!statsEl) {
+    statsEl = document.createElement('div');
+    statsEl.id = 'rkStats';
+    statsEl.style.cssText = 'width:100%;padding:12px 28px;display:flex;gap:12px;flex-shrink:0;';
+    document.getElementById('s-ranking').appendChild(statsEl);
+  }
+  statsEl.innerHTML = buildStatsHTML(hoy, total);
+
   showScreen('s-ranking');
   startCountdown('rkCountdown', 15, restart);
+}
+
+function buildStatsHTML(hoy, total) {
+  const avgScore = S.ranking.length
+    ? Math.round(S.ranking.reduce((a,r)=>a+parseInt(r.puntaje||0),0)/S.ranking.length*10)/10
+    : 0;
+  const stats = [
+    { icon:'👥', val: hoy,      label:'jugaron hoy' },
+    { icon:'🏆', val: total,    label:'partidas totales' },
+    { icon:'📊', val: avgScore + '/' + QUESTIONS_PER_GAME, label:'promedio general' },
+  ];
+  return stats.map(s => `
+    <div style="flex:1;background:rgba(200,169,110,.07);border:1px solid rgba(200,169,110,.15);
+      border-radius:3px;padding:10px 8px;text-align:center;">
+      <div style="font-size:1.3rem">${s.icon}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--sepia)">${s.val}</div>
+      <div style="font-size:.68rem;color:var(--faded);letter-spacing:.05em">${s.label}</div>
+    </div>
+  `).join('');
 }
 
 // ══════════════════════════════════════════════════
@@ -1323,6 +1374,21 @@ function showNoTop() {
     li.innerHTML=`<div class="rk-pos ${i<3?['gold','silver','bronze'][i]:''}">${medal}</div><div class="rk-name">${r.nombre}</div><div class="rk-score">${r.puntaje}/${QUESTIONS_PER_GAME}</div>`;
     mini.appendChild(li);
   });
+
+  // Stats in no-top screen too
+  const hoy2  = S.ranking.filter(r => {
+    if(!r.ts) return false;
+    const d = new Date(r.ts); const n = new Date();
+    return d.toDateString() === n.toDateString();
+  }).length;
+  let statsEl2 = document.getElementById('notopStats');
+  if(!statsEl2) {
+    statsEl2 = document.createElement('div');
+    statsEl2.id = 'notopStats';
+    statsEl2.style.cssText = 'width:100%;max-width:400px;display:flex;gap:10px;';
+    document.getElementById('notopCountdown').parentElement.insertBefore(statsEl2, document.getElementById('notopCountdown'));
+  }
+  statsEl2.innerHTML = buildStatsHTML(hoy2, S.ranking.length);
 
   showScreen('s-notop');
   startCountdown('notopCountdown', 10, restart);
