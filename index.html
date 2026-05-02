@@ -675,6 +675,9 @@ body::after {
   letter-spacing: .05em;
 }
 .btn-skip-cert:hover { border-color: var(--sepia); color: var(--sepia); }
+
+/* QR Popup */
+#qrPopup.open { display:flex !important; }
 </style>
 </head>
 <body>
@@ -819,13 +822,45 @@ body::after {
     <canvas id="certCanvas"></canvas>
   </div>
   <div class="cert-actions">
-    <button class="btn-download" onclick="downloadCert()">
-      ⬇ Descargar Certificado
-    </button>
-    <button class="btn-skip-cert" onclick="proceedToRanking()">
-      Continuar al ranking →
+    <button class="btn-download" onclick="showQRPopup()">
+      📱 Enviar certificado al celular
     </button>
   </div>
+
+  <!-- QR Popup -->
+  <div id="qrPopup" style="display:none;position:fixed;inset:0;z-index:200;
+    background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;flex-direction:column;gap:20px;">
+    <div style="background:#1a1208;border:1px solid rgba(200,169,110,.4);
+      border-radius:4px;padding:32px 28px;max-width:340px;width:90%;
+      text-align:center;position:relative;">
+      <button onclick="closeQRPopup()" style="position:absolute;top:12px;right:14px;
+        background:none;border:none;color:var(--sepia);font-size:1.4rem;cursor:pointer;">✕</button>
+      <p style="font-family:'IM Fell English',serif;font-style:italic;
+        font-size:.75rem;letter-spacing:.2em;color:var(--sepia);margin-bottom:12px;">
+        ESCANEAR PARA DESCARGAR
+      </p>
+      <div id="qrContainer" style="background:white;padding:12px;border-radius:4px;
+        display:inline-block;margin-bottom:16px;">
+        <canvas id="qrCanvas" width="200" height="200"></canvas>
+      </div>
+      <p style="font-size:.85rem;color:var(--faded);font-style:italic;margin-bottom:20px;">
+        Escaneá el código con tu celular<br>para abrir el certificado en WhatsApp
+      </p>
+      <button onclick="closeQRPopup()" class="btn-skip-cert" style="width:100%">
+        Cerrar y ver ranking →
+      </button>
+    </div>
+  </div>
+
+  <!-- Volver al inicio -->
+  <button onclick="restart()" style="position:fixed;bottom:20px;left:20px;
+    background:rgba(0,0,0,.6);border:1px solid rgba(200,169,110,.3);
+    color:var(--faded);font-family:'Cormorant Garamond',serif;
+    font-size:.85rem;padding:10px 16px;border-radius:var(--radius);
+    cursor:pointer;transition:all .3s;z-index:50;display:flex;align-items:center;gap:8px;">
+    ↩ Volver al inicio
+  </button>
 </div>
 
 <div id="toast"></div>
@@ -1595,6 +1630,18 @@ function toast(msg) {
 // ── CERTIFICATE ───────────────────────────────────────
 const CERT_IMG_URL = 'https://ingpussetto-web.github.io/davinci-trivia/img/certificado.jpg';
 
+// Canvas dimensions (match output image 1400x982)
+const CERT_W = 1400, CERT_H = 982;
+
+// Text zones — calibrated from pixel analysis of blank certificate
+// Zone 4 (big blank): 40.4% to 60.2% of height
+// Name goes in upper half of blank zone, Grade in lower half
+const ZONES = {
+  name:  { y: 0.455, size: 0.052 },   // Upper blank zone
+  grade: { y: 0.548, size: 0.075 },   // Lower blank zone  
+  date:  { y: 0.700, size: 0.021 },   // Date line
+};
+
 function getGrado(score, total) {
   const pct = score / total;
   if (pct <= 0.33) return { it: 'Apprendista', es: 'Aprendiz' };
@@ -1609,79 +1656,138 @@ function getRomanDate() {
   const toRoman = n => {
     const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
     const s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-    let r='';
-    for(let i=0;i<v.length;i++) while(n>=v[i]){r+=s[i];n-=v[i];}
-    return r;
+    let r=''; for(let i=0;i<v.length;i++) while(n>=v[i]){r+=s[i];n-=v[i];} return r;
   };
-  return `${d.getDate()} ${months[d.getMonth()]} ${toRoman(d.getFullYear())}`;
+  const day = d.getDate();
+  return `${day} ${months[d.getMonth()]} ${toRoman(d.getFullYear())}`;
 }
 
 function showCertificate() {
   showScreen('s-cert');
-  const canvas  = document.getElementById('certCanvas');
-  const ctx     = canvas.getContext('2d');
-  const img     = new Image();
+  const canvas = document.getElementById('certCanvas');
+  const ctx    = canvas.getContext('2d');
+  const img    = new Image();
   img.crossOrigin = 'anonymous';
   img.onload = () => {
-    // Set canvas to image natural ratio
-    const W = 1200, H = Math.round(1200 * img.height / img.width);
-    canvas.width  = W;
-    canvas.height = H;
-
-    // Draw background image
-    ctx.drawImage(img, 0, 0, W, H);
+    canvas.width  = CERT_W;
+    canvas.height = CERT_H;
+    // Draw base certificate
+    ctx.drawImage(img, 0, 0, CERT_W, CERT_H);
 
     const grado = getGrado(S.score, QUESTIONS_PER_GAME);
+    const cx    = CERT_W / 2;
 
-    // === NOME DEL PARTECIPANTE ===
+    // Helper: draw text matching certificate style
+    function drawField(text, yPct, sizePct, color, style) {
+      const fontSize = Math.round(CERT_W * sizePct);
+      ctx.save();
+      ctx.font         = (style||'bold') + ' ' + fontSize + 'px Georgia, serif';
+      ctx.fillStyle    = color || '#2a1005';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor  = 'rgba(0,0,0,.08)';
+      ctx.shadowBlur   = 3;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
+      ctx.fillText(text, cx, Math.round(CERT_H * yPct));
+      ctx.restore();
+    }
+
+    // Fit name to width if too long
+    function fitText(ctx, text, maxW, baseSize) {
+      ctx.font = 'bold ' + baseSize + 'px Georgia, serif';
+      while(ctx.measureText(text).width > maxW && baseSize > 20) {
+        baseSize -= 2;
+        ctx.font = 'bold ' + baseSize + 'px Georgia, serif';
+      }
+      return baseSize;
+    }
+
+    // Name — auto-fit size
+    const nameMaxW  = CERT_W * 0.55;
+    const nameSize  = fitText(ctx, S.name.toUpperCase(), nameMaxW, Math.round(CERT_W * ZONES.name.size));
+    ctx.save();
+    ctx.font         = 'bold ' + nameSize + 'px Georgia, serif';
+    ctx.fillStyle    = '#2a1005';
     ctx.textAlign    = 'center';
-    ctx.fillStyle    = '#3a1f08';
-    ctx.font         = `bold ${Math.round(W*0.06)}px 'Playfair Display', serif`;
-    ctx.letterSpacing = '2px';
-    // Shadow
-    ctx.shadowColor  = 'rgba(200,160,80,.4)';
-    ctx.shadowBlur   = 8;
-    ctx.fillText(S.name.toUpperCase(), W/2, H * 0.435);
-    ctx.shadowBlur   = 0;
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor  = 'rgba(0,0,0,.1)';
+    ctx.shadowBlur   = 2;
+    ctx.fillText(S.name.toUpperCase(), cx, Math.round(CERT_H * ZONES.name.y));
+    ctx.restore();
 
-    // === GRADO ===
-    ctx.font         = `bold ${Math.round(W*0.085)}px 'Playfair Display', serif`;
-    ctx.fillStyle    = '#7a2e0a';
-    ctx.shadowColor  = 'rgba(200,120,30,.3)';
-    ctx.shadowBlur   = 10;
-    ctx.fillText(grado.it.toUpperCase(), W/2, H * 0.535);
-    ctx.shadowBlur   = 0;
+    // Grade
+    const gradeSize = Math.round(CERT_W * ZONES.grade.size);
+    ctx.save();
+    ctx.font         = 'bold ' + gradeSize + 'px Georgia, serif';
+    ctx.fillStyle    = '#6b1a04';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor  = 'rgba(100,20,0,.15)';
+    ctx.shadowBlur   = 3;
+    ctx.fillText(grado.it.toUpperCase(), cx, Math.round(CERT_H * ZONES.grade.y));
+    ctx.restore();
 
-    // === PUNTAJE ===
-    ctx.font         = `italic ${Math.round(W*0.028)}px 'Cormorant Garamond', serif`;
-    ctx.fillStyle    = '#4a2a0a';
-    ctx.fillText(`Punteggio: ${S.score} di ${QUESTIONS_PER_GAME} · ${grado.es}`, W/2, H * 0.585);
-
-    // === FECHA ===
-    ctx.font         = `${Math.round(W*0.022)}px 'Cormorant Garamond', serif`;
-    ctx.fillStyle    = '#3a1f08';
-    ctx.fillText(`Dato il ${getRomanDate()}`, W/2, H * 0.695);
+    // Date line
+    drawField('Dato il ' + getRomanDate(), ZONES.date.y, ZONES.date.size, '#3a2010', 'italic');
   };
-  img.onerror = () => toast('No se pudo cargar la imagen del certificado');
-  img.src = CERT_IMG_URL + '?v=' + Date.now();
+  img.onerror = () => toast('Error cargando el certificado');
+  img.src = CERT_IMG_URL + '?t=' + Date.now();
 }
 
-function downloadCert() {
-  const canvas = document.getElementById('certCanvas');
-  const link   = document.createElement('a');
-  link.download = `certificado-davinci-${S.name.replace(/\s+/g,'-').toLowerCase()}.png`;
-  link.href    = canvas.toDataURL('image/png');
-  link.click();
-  toast('✓ Certificado descargado');
+// ── QR CODE ────────────────────────────────────────────
+function showQRPopup() {
+  // Generate WhatsApp share link with certificate data URL
+  const canvas   = document.getElementById('certCanvas');
+  const dataUrl  = canvas.toDataURL('image/jpeg', .92);
+
+  // Build WhatsApp message
+  const grado    = getGrado(S.score, QUESTIONS_PER_GAME);
+  const msg      = encodeURIComponent(
+    `🏛️ *Trivia Leonardo da Vinci*
+` +
+    `
+🎓 *${S.name}* obtuvo el grado de *${grado.it}*` +
+    ` con ${S.score}/${QUESTIONS_PER_GAME} puntos.
+` +
+    `
+📜 Descargá tu certificado desde:
+` +
+    `https://ingpussetto-web.github.io/davinci-trivia/`
+  );
+  const waUrl = `https://wa.me/?text=${msg}`;
+
+  // Draw QR code pointing to WhatsApp URL
+  const qrCanvas = document.getElementById('qrCanvas');
+  drawQR(qrCanvas, waUrl, 200);
+
+  document.getElementById('qrPopup').style.display = 'flex';
+}
+
+function closeQRPopup() {
+  document.getElementById('qrPopup').style.display = 'none';
+  proceedToRanking();
+}
+
+// Minimal QR code generator (pure JS, no library)
+function drawQR(canvas, text, size) {
+  // Use QR API service
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => ctx.drawImage(img, 0, 0, size, size);
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=1a0f06&bgcolor=ffffff`;
 }
 
 function proceedToRanking() {
-  // Go to ranking or no-top screen
   const myRank = S.ranking.findIndex(r =>
     r.nombre === S.name && parseInt(r.puntaje) === S.score
   );
-  // Show certificate first, then ranking
-  showCertificate();
+  if(myRank !== -1 && myRank < 10) {
+    showRanking(myRank);
+  } else {
+    showNoTop();
+  }
 }
 
 </script>
