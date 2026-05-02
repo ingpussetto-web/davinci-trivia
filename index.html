@@ -587,6 +587,94 @@ body::after {
   0%,100% { opacity: 1; }
   50%      { opacity: .85; }
 }
+
+/* ════════════════════════════════════════
+   CERTIFICATE SCREEN
+════════════════════════════════════════ */
+#s-cert {
+  background: #0a0704;
+  gap: 0;
+  justify-content: flex-start;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.cert-header {
+  width: 100%;
+  padding: 20px 24px 12px;
+  text-align: center;
+  flex-shrink: 0;
+  background: rgba(0,0,0,.4);
+}
+.cert-eyebrow {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: .75rem;
+  letter-spacing: .3em;
+  color: var(--sepia);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cert-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--parch);
+}
+
+.cert-canvas-wrap {
+  width: 100%;
+  padding: 16px 16px 8px;
+  flex-shrink: 0;
+}
+
+#certCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+}
+
+.cert-actions {
+  width: 100%;
+  padding: 12px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-download {
+  width: 100%;
+  background: linear-gradient(135deg, #8b5a1e, #5c3a10);
+  border: 1px solid var(--sepia);
+  color: var(--parch);
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  letter-spacing: .06em;
+  padding: 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all .3s;
+}
+.btn-download:hover {
+  background: linear-gradient(135deg, #a06828, #7a4e18);
+  box-shadow: 0 4px 20px rgba(200,169,110,.25);
+}
+
+.btn-skip-cert {
+  background: transparent;
+  border: 1px solid rgba(200,169,110,.25);
+  color: var(--faded);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .95rem;
+  padding: 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all .3s;
+  letter-spacing: .05em;
+}
+.btn-skip-cert:hover { border-color: var(--sepia); color: var(--sepia); }
 </style>
 </head>
 <body>
@@ -716,6 +804,28 @@ body::after {
   <ul class="rk-mini-list" id="rkMiniList"></ul>
 
   <p class="notop-countdown" id="notopCountdown"></p>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     CERTIFICATE SCREEN
+══════════════════════════════════════ -->
+<div id="s-cert" class="screen">
+  <div class="cert-header">
+    <p class="cert-eyebrow">Attestato di Partecipazione</p>
+    <h2 class="cert-title">Tu Certificado Renaissance</h2>
+  </div>
+  <div class="cert-canvas-wrap">
+    <canvas id="certCanvas"></canvas>
+  </div>
+  <div class="cert-actions">
+    <button class="btn-download" onclick="downloadCert()">
+      ⬇ Descargar Certificado
+    </button>
+    <button class="btn-skip-cert" onclick="proceedToRanking()">
+      Continuar al ranking →
+    </button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -1260,11 +1370,8 @@ async function finishGame() {
     r.nombre===S.name && parseInt(r.puntaje)===S.score
   );
 
-  if(myRank !== -1 && myRank < 10) {
-    showRanking(myRank);
-  } else {
-    showNoTop();
-  }
+  // Show certificate first, then ranking
+  showCertificate();
 }
 
 // ══════════════════════════════════════════════════
@@ -1483,6 +1590,99 @@ function toast(msg) {
     container.appendChild(p);
   }
 })();
+
+
+// ── CERTIFICATE ───────────────────────────────────────
+const CERT_IMG_URL = 'https://ingpussetto-web.github.io/davinci-trivia/img/certificado.jpg';
+
+function getGrado(score, total) {
+  const pct = score / total;
+  if (pct <= 0.33) return { it: 'Apprendista', es: 'Aprendiz' };
+  if (pct <= 0.66) return { it: 'Compagno',    es: 'Compañero' };
+  return               { it: 'Maestro',      es: 'Maestro' };
+}
+
+function getRomanDate() {
+  const d = new Date();
+  const months = ['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii',
+                  'Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
+  const toRoman = n => {
+    const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+    const s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+    let r='';
+    for(let i=0;i<v.length;i++) while(n>=v[i]){r+=s[i];n-=v[i];}
+    return r;
+  };
+  return `${d.getDate()} ${months[d.getMonth()]} ${toRoman(d.getFullYear())}`;
+}
+
+function showCertificate() {
+  showScreen('s-cert');
+  const canvas  = document.getElementById('certCanvas');
+  const ctx     = canvas.getContext('2d');
+  const img     = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    // Set canvas to image natural ratio
+    const W = 1200, H = Math.round(1200 * img.height / img.width);
+    canvas.width  = W;
+    canvas.height = H;
+
+    // Draw background image
+    ctx.drawImage(img, 0, 0, W, H);
+
+    const grado = getGrado(S.score, QUESTIONS_PER_GAME);
+
+    // === NOME DEL PARTECIPANTE ===
+    ctx.textAlign    = 'center';
+    ctx.fillStyle    = '#3a1f08';
+    ctx.font         = `bold ${Math.round(W*0.06)}px 'Playfair Display', serif`;
+    ctx.letterSpacing = '2px';
+    // Shadow
+    ctx.shadowColor  = 'rgba(200,160,80,.4)';
+    ctx.shadowBlur   = 8;
+    ctx.fillText(S.name.toUpperCase(), W/2, H * 0.435);
+    ctx.shadowBlur   = 0;
+
+    // === GRADO ===
+    ctx.font         = `bold ${Math.round(W*0.085)}px 'Playfair Display', serif`;
+    ctx.fillStyle    = '#7a2e0a';
+    ctx.shadowColor  = 'rgba(200,120,30,.3)';
+    ctx.shadowBlur   = 10;
+    ctx.fillText(grado.it.toUpperCase(), W/2, H * 0.535);
+    ctx.shadowBlur   = 0;
+
+    // === PUNTAJE ===
+    ctx.font         = `italic ${Math.round(W*0.028)}px 'Cormorant Garamond', serif`;
+    ctx.fillStyle    = '#4a2a0a';
+    ctx.fillText(`Punteggio: ${S.score} di ${QUESTIONS_PER_GAME} · ${grado.es}`, W/2, H * 0.585);
+
+    // === FECHA ===
+    ctx.font         = `${Math.round(W*0.022)}px 'Cormorant Garamond', serif`;
+    ctx.fillStyle    = '#3a1f08';
+    ctx.fillText(`Dato il ${getRomanDate()}`, W/2, H * 0.695);
+  };
+  img.onerror = () => toast('No se pudo cargar la imagen del certificado');
+  img.src = CERT_IMG_URL + '?v=' + Date.now();
+}
+
+function downloadCert() {
+  const canvas = document.getElementById('certCanvas');
+  const link   = document.createElement('a');
+  link.download = `certificado-davinci-${S.name.replace(/\s+/g,'-').toLowerCase()}.png`;
+  link.href    = canvas.toDataURL('image/png');
+  link.click();
+  toast('✓ Certificado descargado');
+}
+
+function proceedToRanking() {
+  // Go to ranking or no-top screen
+  const myRank = S.ranking.findIndex(r =>
+    r.nombre === S.name && parseInt(r.puntaje) === S.score
+  );
+  // Show certificate first, then ranking
+  showCertificate();
+}
 
 </script>
 </body>
