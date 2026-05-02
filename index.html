@@ -549,13 +549,13 @@ body::after {
   object-fit: cover;
   object-position: center top;
   opacity: .18;
-  filter: sepia(.4) contrast(1.1) brightness(.7);
+  filter: sepia(.25) contrast(1.15) brightness(.85);
   animation: leoBreathe 8s ease-in-out infinite;
   transform-origin: center center;
 }
 @keyframes leoBreathe {
-  0%,100% { transform: scale(1);    opacity: .16; }
-  50%      { transform: scale(1.03); opacity: .22; }
+  0%,100% { transform: scale(1);    opacity: .38; }
+  50%      { transform: scale(1.03); opacity: .48; }
 }
 
 /* Partículas doradas */
@@ -851,22 +851,22 @@ const ALL_QUESTIONS = [
     img:IMG.autorret, cap:"Autorretrato · c.1512", hasImg:true, pos:"top",
     opts:["1442","1452","1460","1471"], ans:1 },
   { q:"¿Qué característica tenía la escritura de Da Vinci en sus cuadernos?",
-    img:IMG.codex, cap:"Cuadernos de Da Vinci · c.1490", hasImg:true, pos:"center",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci · c.1490", hasImg:true, pos:"top",
     opts:["Usaba cifrado secreto","Escribía en espejo de derecha a izquierda","Usaba latín exclusivamente","Mezclaba tres idiomas"], ans:1 },
   { q:"¿Qué estudio realizó Leonardo diseccionando más de 30 cadáveres?",
     img:IMG.anatomia, cap:"Estudios anatómicos · c.1510", hasImg:true, pos:"top",
     opts:["Anatomía animal","Anatomía humana","Geología","Botánica"], ans:1 },
   { q:"¿Cuál de estas máquinas diseñó Da Vinci como precursora del helicóptero?",
-    img:IMG.helicop, cap:"Tornillo aéreo · c.1489", hasImg:true, pos:"center",
+    img:IMG.helicop, cap:"Tornillo aéreo · c.1489", hasImg:true, pos:"top",
     opts:["Ala delta","Tornillo aéreo","Planeador","Globo de aire caliente"], ans:1 },
   { q:"¿Quién encargó a Leonardo la pintura de La Virgen de las Rocas?",
-    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true, pos:"top center",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true, pos:"top",
     opts:["La familia Sforza","La Cofradía de la Inmaculada Concepción","El Papa Inocencio VIII","Lorenzo de Médici"], ans:1 },
   { q:"¿Cuál es el nombre completo de la pintura conocida como 'La Mona Lisa'?",
     img:IMG.mona, cap:"La Gioconda · Museo del Louvre", hasImg:true, pos:"top",
     opts:["Retrato de Lisa","La Gioconda","Madonna Lisa","Ritratto di Donna"], ans:1 },
   { q:"¿Aproximadamente en qué año fue creado el 'Hombre de Vitruvio'?",
-    img:IMG.vitruvio, cap:"Hombre de Vitruvio · c.1490", hasImg:true, pos:"center",
+    img:IMG.vitruvio, cap:"Hombre de Vitruvio · c.1490", hasImg:true, pos:"top",
     opts:["1480","1485","1490","1498"], ans:2 },
   { q:"¿Cuál fue el mecenas principal de Da Vinci durante su período en Milán?",
     img:IMG.sforza, cap:"Ludovico Sforza · Duque de Milán", hasImg:true, pos:"top",
@@ -890,7 +890,7 @@ const ALL_QUESTIONS = [
     img:IMG.salvator, cap:"Salvator Mundi · Christie's 2017", hasImg:true, pos:"top",
     opts:["USD 150 millones","USD 290 millones","USD 450 millones","USD 600 millones"], ans:2 },
   { q:"¿Qué instrumento musical tocaba con maestría Leonardo da Vinci?",
-    img:IMG.musica, cap:"Música en el Renacimiento", hasImg:true, pos:"center",
+    img:IMG.musica, cap:"Música en el Renacimiento", hasImg:true, pos:"top",
     opts:["Clavicémbalo","Laúd","Violín","Flauta traversa"], ans:1 },
   { q:"¿Qué retrato femenino pintó Da Vinci para la familia Benci de Florencia?",
     img:IMG.ginevra, cap:"Ginevra de Benci · c.1476", hasImg:true, pos:"top",
@@ -899,16 +899,16 @@ const ALL_QUESTIONS = [
     img:IMG.bautista, cap:"San Juan Bautista · c.1513", hasImg:true, pos:"top",
     opts:["San Marcos","San Juan Bautista","San Pedro","San Lucas"], ans:1 },
   { q:"¿Qué estudió Da Vinci a través del movimiento y comportamiento del agua?",
-    img:IMG.agua, cap:"Estudios de agua · Da Vinci", hasImg:true, pos:"center",
+    img:IMG.agua, cap:"Estudios de agua · Da Vinci", hasImg:true, pos:"top",
     opts:["Termodinámica","Hidrodinámica","Electrostática","Acústica"], ans:1 },
   { q:"¿Cuál de estas máquinas de guerra diseñó Leonardo para el Duque Sforza?",
-    img:IMG.tanque, cap:"Vehículo blindado · c.1487", hasImg:true, pos:"center",
+    img:IMG.tanque, cap:"Vehículo blindado · c.1487", hasImg:true, pos:"top",
     opts:["Submarino","Tanque blindado autopropulsado","Catapulta giratoria","Ballesta gigante"], ans:1 },
   { q:"¿Qué diseño de Da Vinci anticipó el concepto del ala delta moderna?",
-    img:IMG.alas, cap:"Máquina voladora · c.1485", hasImg:true, pos:"center",
+    img:IMG.alas, cap:"Máquina voladora · c.1485", hasImg:true, pos:"top",
     opts:["Tornillo aéreo","Ornitóptero (alas batientes)","Planeador de alas fijas","Globo de aire"], ans:1 },
   { q:"¿Qué tipo de arma de guerra de largo alcance diseñó Leonardo en sus cuadernos?",
-    img:IMG.maquina, cap:"Máquinas de guerra · Da Vinci", hasImg:true, pos:"center",
+    img:IMG.maquina, cap:"Máquinas de guerra · Da Vinci", hasImg:true, pos:"top",
     opts:["Arcabuz de repetición","Cañón de vapor","Lanzallamas","Mortero giratorio"], ans:1 },
   { q:"¿Cuál fue la primera ciudad donde Da Vinci trabajó como artista independiente?",
     img:IMG.florencia, cap:"Florencia · Toscana", hasImg:true, pos:"center",
@@ -917,22 +917,22 @@ const ALL_QUESTIONS = [
     img:IMG.milan, cap:"Milán · s.XV", hasImg:true, pos:"center",
     opts:["5 años","10 años","17 años","25 años"], ans:2 },
   { q:"¿Qué tipo de escultura ecuestre monumental encargó Ludovico Sforza a Da Vinci?",
-    img:IMG.caballo, cap:"Estudios de caballos · Da Vinci", hasImg:true, pos:"center",
+    img:IMG.caballo, cap:"Estudios de caballos · Da Vinci", hasImg:true, pos:"top",
     opts:["Una estatua de San Jorge","El Gran Caballo (Il Cavallo)","El caballo de Constantino","La cuadriga de Milán"], ans:1 },
   { q:"¿Qué técnica pictórica de Da Vinci crea transiciones suaves entre luces y sombras?",
-    img:IMG.claroscuro, cap:"Técnica del claroscuro", hasImg:true, pos:"center",
+    img:IMG.claroscuro, cap:"Técnica del claroscuro", hasImg:true, pos:"top",
     opts:["Puntillismo","Sfumato","Chiaroscuro","Fresco"], ans:1 },
   { q:"¿Qué diseñó Da Vinci para conectar Florencia con el mar Adriático?",
-    img:IMG.puente, cap:"Diseño de puente · Da Vinci", hasImg:true, pos:"center",
+    img:IMG.puente, cap:"Diseño de puente · Da Vinci", hasImg:true, pos:"top",
     opts:["Un túnel subterráneo","Un canal artificial","Un puente colgante","Un acueducto elevado"], ans:1 },
   { q:"¿Cuántas obras pictóricas terminadas se atribuyen a Da Vinci con certeza?",
-    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true, pos:"top center",
+    img:IMG.virgen, cap:"La Virgen de las Rocas · Louvre", hasImg:true, pos:"top",
     opts:["Menos de 20","Entre 30 y 40","Más de 50","Exactamente 25"], ans:0 },
   { q:"¿Con quién aprendió Da Vinci el oficio de pintor en Florencia?",
-    img:IMG.pinceles, cap:"Taller renacentista · Florencia", hasImg:true, pos:"center",
+    img:IMG.pinceles, cap:"Taller renacentista · Florencia", hasImg:true, pos:"top",
     opts:["Sandro Botticelli","Andrea del Verrocchio","Michelangelo","Rafael"], ans:1 },
   { q:"¿Qué tipo de escultura en bronce creó el taller de Verrocchio donde trabajó Da Vinci?",
-    img:IMG.escultura, cap:"Escultura renacentista · s.XV", hasImg:true, pos:"center",
+    img:IMG.escultura, cap:"Escultura renacentista · s.XV", hasImg:true, pos:"top",
     opts:["Figuras religiosas en mármol","Esculturas ecuestres en bronce","Bajorrelieves en terracota","Bustos en yeso"], ans:1 },
   { q:"¿Qué familia florentina fue mecenas de las artes durante el Renacimiento?",
     img:IMG.medici, cap:"Lorenzo de Médici · Florencia", hasImg:true, pos:"top",
@@ -944,7 +944,7 @@ const ALL_QUESTIONS = [
     img:IMG.venecia, cap:"Venecia · República Serenísima", hasImg:true, pos:"center",
     opts:["Génova","Florencia","Venecia","Pisa"], ans:2 },
   { q:"¿Qué diseño decorativo complejo popularizó Leonardo como ejercicio mental?",
-    img:IMG.nudo, cap:"Diseño de nudos · Da Vinci", hasImg:true, pos:"center",
+    img:IMG.nudo, cap:"Diseño de nudos · Da Vinci", hasImg:true, pos:"top",
     opts:["Arabescos islámicos","Nudos entrelazados (Vinci knots)","Mosaicos romanos","Frescos al secco"], ans:1 },
   { q:"¿Qué obra de Da Vinci representa a Jesús con un orbe de cristal en su mano?",
     img:IMG.salvator, cap:"Salvator Mundi · c.1500", hasImg:true, pos:"top",
@@ -964,7 +964,7 @@ const ALL_QUESTIONS = [
     img:IMG.cena, cap:"La Última Cena · composición", hasImg:true, pos:"center",
     opts:["San Juan","Jesucristo","San Pedro","Judas"], ans:1 },
   { q:"¿Con qué mano escribía habitualmente Leonardo da Vinci?",
-    img:IMG.codex, cap:"Cuadernos de Da Vinci", hasImg:true, pos:"center",
+    img:IMG.codex, cap:"Cuadernos de Da Vinci", hasImg:true, pos:"top",
     opts:["Mano derecha","Mano izquierda","Ambas manos","Dictaba a asistentes"], ans:1 },
   { q:"¿Cuántos años vivió Leonardo da Vinci?",
     img:IMG.autorret, cap:"Autorretrato · c.1512", hasImg:true, pos:"top",
@@ -979,22 +979,22 @@ const ALL_QUESTIONS = [
     img:IMG.toscana, cap:"Vinci · Toscana", hasImg:true, pos:"center",
     opts:["Comerciante","Notario","Médico","Sacerdote"], ans:1 },
   { q:"¿Cuántas versiones de 'La Virgen de las Rocas' existen?",
-    img:IMG.virgen, cap:"La Virgen de las Rocas", hasImg:true, pos:"top center",
+    img:IMG.virgen, cap:"La Virgen de las Rocas", hasImg:true, pos:"top",
     opts:["Una","Dos","Tres","Cuatro"], ans:1 },
   { q:"¿Dónde se conserva actualmente el Codex Leicester de Leonardo?",
-    img:IMG.codex, cap:"Codex Leicester", hasImg:true, pos:"center",
+    img:IMG.codex, cap:"Codex Leicester", hasImg:true, pos:"top",
     opts:["Museo Británico","Bill Gates (colección privada)","Biblioteca Vaticana","Louvre"], ans:1 },
   { q:"¿Cuántas páginas de cuadernos de Da Vinci se conservan actualmente?",
-    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true, pos:"center",
+    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true, pos:"top",
     opts:["500","3.500","7.000","15.000"], ans:1 },
   { q:"¿Qué término filosófico describe mejor a Da Vinci?",
-    img:IMG.vitruvio, cap:"Hombre Universal", hasImg:true, pos:"center",
+    img:IMG.vitruvio, cap:"Hombre Universal", hasImg:true, pos:"top",
     opts:["Escolástico","Uomo Universale","Condottiero","Humanista radical"], ans:1 },
   { q:"¿Cuál de estos Codex se conserva en la Biblioteca Ambrosiana de Milán?",
-    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true, pos:"center",
+    img:IMG.codex, cap:"Cuadernos de Leonardo", hasImg:true, pos:"top",
     opts:["Codex Leicester","Codex Atlanticus","Codex Arundel","Codex Madrid"], ans:1 },
   { q:"¿Qué posición ocupaba Leonardo en el taller de Verrocchio?",
-    img:IMG.pinceles, cap:"Taller renacentista", hasImg:true, pos:"center",
+    img:IMG.pinceles, cap:"Taller renacentista", hasImg:true, pos:"top",
     opts:["Maestro principal","Aprendiz (garzone)","Contable","Escultor jefe"], ans:1 },
 ];
 
@@ -1401,7 +1401,7 @@ function toast(msg) {
 (function() {
   const container = document.getElementById('particles');
   if(!container) return;
-  const count = 18;
+  const count = 28;
   for(let i = 0; i < count; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
