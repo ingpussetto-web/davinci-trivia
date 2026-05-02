@@ -535,6 +535,58 @@ body::after {
 .d1{animation-delay:.08s} .d2{animation-delay:.16s}
 .d3{animation-delay:.24s} .d4{animation-delay:.32s}
 .d5{animation-delay:.4s}  .d6{animation-delay:.48s}
+
+/* ════════════════════════════════════════
+   LEONARDO BACKGROUND
+════════════════════════════════════════ */
+.leo-bg {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden; pointer-events: none;
+}
+.leo-bg-img {
+  position: absolute;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: .18;
+  filter: sepia(.4) contrast(1.1) brightness(.7);
+  animation: leoBreathe 8s ease-in-out infinite;
+  transform-origin: center center;
+}
+@keyframes leoBreathe {
+  0%,100% { transform: scale(1);    opacity: .16; }
+  50%      { transform: scale(1.03); opacity: .22; }
+}
+
+/* Partículas doradas */
+.particles {
+  position: absolute; inset: 0;
+}
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: #c8a96e;
+  border-radius: 50%;
+  opacity: 0;
+  animation: floatUp var(--dur) ease-in var(--delay) infinite;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(100vh) translateX(0);   opacity: 0; }
+  10%  { opacity: .6; }
+  90%  { opacity: .3; }
+  100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+}
+
+/* Vignette pulsante */
+.leo-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, transparent 25%, rgba(0,0,0,.75) 100%);
+  animation: vigPulse 6s ease-in-out infinite;
+}
+@keyframes vigPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .85; }
+}
 </style>
 </head>
 <body>
@@ -542,6 +594,13 @@ body::after {
 <!-- ══════════════════════════════════════
      WELCOME
 ══════════════════════════════════════ -->
+
+<!-- ══ LEONARDO BACKGROUND ══ -->
+<div class="leo-bg" id="leoBg">
+  <img class="leo-bg-img" src="https://ingpussetto-web.github.io/davinci-trivia/img/leonardo-bg.jpg" alt="">
+  <div class="particles" id="particles"></div>
+  <div class="leo-vignette"></div>
+</div>
 <div id="s-welcome" class="screen active">
   <p class="w-ornament anim d1">Trivia · Genios del Renacimiento</p>
   <h1 class="w-title anim d2">Leonardo<em>da Vinci</em></h1>
@@ -1337,6 +1396,28 @@ function toast(msg) {
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3500);
 }
+
+// ── Partículas flotantes ──────────────────
+(function() {
+  const container = document.getElementById('particles');
+  if(!container) return;
+  const count = 18;
+  for(let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const x = Math.random() * 100;
+    const dur = 8 + Math.random() * 12;
+    const delay = Math.random() * 10;
+    const drift = (Math.random() - .5) * 80;
+    p.style.cssText = `left:${x}%;--dur:${dur}s;--delay:${delay}s;--drift:${drift}px;`;
+    // Vary size
+    const sz = 1 + Math.random() * 2.5;
+    p.style.width = sz + 'px';
+    p.style.height = sz + 'px';
+    container.appendChild(p);
+  }
+})();
+
 </script>
 </body>
 </html>
