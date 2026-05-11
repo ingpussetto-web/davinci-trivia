@@ -1698,7 +1698,7 @@ function drawCertificate() {
   const canvas = document.getElementById('certCanvas');
   const ctx    = canvas.getContext('2d');
   const img    = new Image();
-  img.crossOrigin = 'anonymous';
+  // Load via blob to avoid canvas CORS taint
   img.onload = () => {
     canvas.width  = CERT_W;
     canvas.height = CERT_H;
@@ -1779,7 +1779,11 @@ function drawCertificate() {
     txt(yearRoman, 970,  dateY, dateFont, dateColor, false);
   };
   img.onerror = () => toast('Error cargando el certificado');
-  img.src = CERT_IMG_URL + '?t=' + Date.now();
+  // Fetch as blob to avoid CORS taint on canvas
+  fetch(CERT_IMG_URL + '?t=' + Date.now())
+    .then(r => r.blob())
+    .then(blob => { img.src = URL.createObjectURL(blob); })
+    .catch(() => { img.src = CERT_IMG_URL; });
 }
 
 // ── QR CODE ────────────────────────────────────────────
@@ -1800,7 +1804,50 @@ async function showQRPopup() {
 
   try {
     const certCanvas = document.getElementById('certCanvas');
-    const base64     = certCanvas.toDataURL('image/jpeg', 0.88).split(',')[1];
+    // Use toBlob to avoid CORS taint issues
+    const base64 = await new Promise((resolve, reject) => {
+      try {
+        const data = certCanvas.toDataURL('image/jpeg', 0.88).split(',')[1];
+        resolve(data);
+      } catch(e) {
+        // Canvas tainted - redraw without crossOrigin
+        const c2  = document.createElement('canvas');
+        c2.width  = certCanvas.width;
+        c2.height = certCanvas.height;
+        const ctx2 = c2.getContext('2d');
+        const img2 = new Image();
+        img2.onload = () => {
+          ctx2.drawImage(img2, 0, 0);
+          // Redraw text
+          const grado = getGrado(S.score, QUESTIONS_PER_GAME);
+          const cx = c2.width / 2;
+          function t(text, x, y, font, color) {
+            ctx2.save(); ctx2.font=font; ctx2.fillStyle=color;
+            ctx2.textAlign='center'; ctx2.textBaseline='middle';
+            ctx2.fillText(text,x,y); ctx2.restore();
+          }
+          const nameAvailW=667, nameMaxPx=46, nameMinPx=18;
+          const nameText=S.name.toUpperCase();
+          let ns=nameMaxPx;
+          ctx2.font='900 '+ns+'px "Cinzel",serif';
+          while(ctx2.measureText(nameText).width>nameAvailW&&ns>nameMinPx){ns--;ctx2.font='900 '+ns+'px "Cinzel",serif';}
+          t(nameText,697,467,'900 '+ns+'px "Cinzel",serif','#1e0b03');
+          const gText=grado.it.toUpperCase();
+          let gs=52; ctx2.font='700 '+gs+'px "Cinzel Decorative",serif';
+          while(ctx2.measureText(gText).width>600&&gs>20){gs--;ctx2.font='700 '+gs+'px "Cinzel Decorative",serif';}
+          t(gText,700,549,'700 '+gs+'px "Cinzel Decorative",serif','#6b1204');
+          const d=new Date();
+          const months=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
+          const toRoman=n=>{const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];let r='';for(let i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
+          const df='600 22px "Cinzel",serif', dc='#2a1505', dy=728;
+          t(toRoman(d.getDate()),480,dy,df,dc);
+          t(months[d.getMonth()],620,dy,df,dc);
+          t(toRoman(d.getFullYear()),970,dy,df,dc);
+          resolve(c2.toDataURL('image/jpeg',0.88).split(',')[1]);
+        };
+        img2.src = CERT_IMG_URL;
+      }
+    });
     const filename   = 'cert-' + Date.now() + '.jpg';
     const apiUrl     = 'https://api.github.com/repos/ingpussetto-web/davinci-trivia/contents/img/certificados/' + filename;
 
