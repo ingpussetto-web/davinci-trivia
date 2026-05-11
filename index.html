@@ -867,7 +867,7 @@ body::after {
         <canvas id="qrCanvas" width="200" height="200"></canvas>
       </div>
       <p style="font-size:.85rem;color:var(--faded);font-style:italic;margin-bottom:20px;">
-        Escaneá el código con tu celular<br>para abrir el certificado en WhatsApp
+        Escaneá el código con tu celular<br>para ver y guardar tu certificado
       </p>
       <button onclick="closeQRPopup()" class="btn-skip-cert" style="width:100%">
         Cerrar y ver ranking →
@@ -1783,32 +1783,52 @@ function drawCertificate() {
 }
 
 // ── QR CODE ────────────────────────────────────────────
-function showQRPopup() {
-  // Generate WhatsApp share link with certificate data URL
-  const canvas   = document.getElementById('certCanvas');
-  const dataUrl  = canvas.toDataURL('image/jpeg', .92);
+async function showQRPopup() {
+  const popup = document.getElementById('qrPopup');
+  popup.style.display = 'flex';
 
-  // Build WhatsApp message
-  const grado    = getGrado(S.score, QUESTIONS_PER_GAME);
-  const msg      = encodeURIComponent(
-    `🏛️ *Trivia Leonardo da Vinci*
-` +
-    `
-🎓 *${S.name}* obtuvo el grado de *${grado.it}*` +
-    ` con ${S.score}/${QUESTIONS_PER_GAME} puntos.
-` +
-    `
-📜 Descargá tu certificado desde:
-` +
-    `https://ingpussetto-web.github.io/davinci-trivia/`
-  );
-  const waUrl = `https://wa.me/?text=${msg}`;
-
-  // Draw QR code pointing to WhatsApp URL
+  // Show loading in QR canvas
   const qrCanvas = document.getElementById('qrCanvas');
-  drawQR(qrCanvas, waUrl, 200);
+  const ctx = qrCanvas.getContext('2d');
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fillRect(0,0,200,200);
+  ctx.fillStyle = '#555';
+  ctx.font = '13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Subiendo...', 100, 100);
 
-  document.getElementById('qrPopup').style.display = 'flex';
+  try {
+    const certCanvas = document.getElementById('certCanvas');
+    const base64     = certCanvas.toDataURL('image/jpeg', 0.88).split(',')[1];
+    const filename   = 'cert-' + Date.now() + '.jpg';
+    const apiUrl     = 'https://api.github.com/repos/ingpussetto-web/davinci-trivia/contents/img/certificados/' + filename;
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token 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',
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: 'Cert ' + S.name,
+        content: base64,
+        branch: 'main'
+      })
+    });
+
+    if(!res.ok) throw new Error('Upload failed: ' + res.status);
+
+    const certUrl   = 'https://ingpussetto-web.github.io/davinci-trivia/img/certificados/' + filename;
+    const viewerUrl = 'https://ingpussetto-web.github.io/davinci-trivia/ver-certificado.html?img=' + encodeURIComponent(certUrl) + '&nombre=' + encodeURIComponent(S.name);
+    drawQR(qrCanvas, viewerUrl, 200);
+
+  } catch(err) {
+    console.error(err);
+    drawQR(qrCanvas, 'https://ingpussetto-web.github.io/davinci-trivia/', 200);
+    toast('No se pudo subir el certificado');
+  }
 }
 
 function closeQRPopup() {
