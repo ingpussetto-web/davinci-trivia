@@ -1799,41 +1799,38 @@ async function showQRPopup() {
   ctx.font = '14px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('Generando...', 100, 100);
+  ctx.fillText('Subiendo...', 100, 95);
+  ctx.font = '11px sans-serif';
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('unos segundos', 100, 115);
 
   try {
-    // Get canvas as base64
     const certCanvas = document.getElementById('certCanvas');
-    const base64 = certCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-    const filename = 'cert-' + Date.now() + '.jpg';
+    const base64 = certCanvas.toDataURL('image/jpeg', 0.82).split(',')[1];
 
-    // Use GET request with data encoded — avoids CORS preflight
-    const gasUrl = GAS_URL
-      + '?action=uploadCert'
-      + '&filename=' + encodeURIComponent(filename)
-      + '&nombre='   + encodeURIComponent(S.name);
+    const formData = new FormData();
+    formData.append('key', '786c626256655549d945f30296f5da71');
+    formData.append('image', base64);
+    formData.append('name', 'cert-' + S.name.replace(/[^a-z0-9]/gi, '-'));
 
-    // POST via form submission trick to avoid CORS
-    const res = await fetch(GAS_URL + '?action=uploadCert&filename=' + encodeURIComponent(filename) + '&nombre=' + encodeURIComponent(S.name), {
+    const res  = await fetch('https://api.imgbb.com/1/upload', {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: base64
+      body:   formData
     });
+    const data = await res.json();
 
-    // Since no-cors returns opaque response, we assume success and build URL
-    const certUrl   = 'https://ingpussetto-web.github.io/davinci-trivia/img/certificados/' + filename;
-    const viewerUrl = 'https://ingpussetto-web.github.io/davinci-trivia/ver-certificado.html?img='
-                    + encodeURIComponent(certUrl) + '&nombre=' + encodeURIComponent(S.name);
+    if(!data.success) throw new Error('imgbb error');
 
-    // Wait 3 seconds for GAS to process then show QR
-    setTimeout(() => {
-      drawQR(qrCanvas, viewerUrl, 200);
-      toast('✓ Escaneá el QR para ver tu certificado');
-    }, 3000);
+    const imgUrl    = data.data.url;
+    const viewerUrl = 'https://ingpussetto-web.github.io/davinci-trivia/ver-certificado.html'
+                    + '?img='    + encodeURIComponent(imgUrl)
+                    + '&nombre=' + encodeURIComponent(S.name);
+
+    drawQR(qrCanvas, viewerUrl, 200);
+    toast('Escaneá el QR para ver tu certificado');
 
   } catch(err) {
-    console.error('QR error:', err);
+    console.error('imgbb error:', err);
     drawQR(qrCanvas, 'https://ingpussetto-web.github.io/davinci-trivia/', 200);
     toast('Error: ' + err.message);
   }
