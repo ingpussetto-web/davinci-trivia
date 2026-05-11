@@ -699,6 +699,75 @@ body::after {
   gap: 10px;
   overflow-y:auto;
 }
+
+/* ════════════════════════════════════════
+   TECLADO VIRTUAL
+════════════════════════════════════════ */
+#vkb {
+  position: fixed;
+  bottom: -100%;
+  left: 0; right: 0;
+  z-index: 999;
+  background: linear-gradient(180deg, #1a1208 0%, #0f0a04 100%);
+  border-top: 1px solid rgba(200,169,110,.3);
+  padding: 10px 8px 20px;
+  transition: bottom .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 -8px 32px rgba(0,0,0,.6);
+}
+#vkb.open { bottom: 0; }
+
+.vkb-rows { display:flex; flex-direction:column; gap:6px; }
+.vkb-row  { display:flex; justify-content:center; gap:5px; }
+
+.vkb-key {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(200,169,110,.2);
+  border-radius: 5px;
+  color: var(--parch);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  height: 48px;
+  min-width: 40px;
+  flex: 1;
+  max-width: 60px;
+  cursor: pointer;
+  display: flex; align-items:center; justify-content:center;
+  transition: all .12s;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+.vkb-key:active, .vkb-key.pressed {
+  background: rgba(200,169,110,.25);
+  border-color: rgba(200,169,110,.6);
+  transform: scale(.93);
+}
+.vkb-key.wide  { flex:2; max-width:90px; }
+.vkb-key.wider { flex:3; max-width:140px; }
+.vkb-key.space { flex:6; max-width:none; font-size:.8rem; letter-spacing:.1em; color:var(--faded); }
+.vkb-key.action {
+  background: rgba(200,169,110,.15);
+  border-color: rgba(200,169,110,.4);
+  color: var(--sepia);
+  font-size:.85rem;
+}
+.vkb-key.delete { font-size:1.3rem; }
+
+.vkb-preview {
+  text-align:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.1rem;
+  color:var(--parch);
+  padding: 4px 12px 10px;
+  letter-spacing:.04em;
+  min-height:32px;
+  border-bottom:1px solid rgba(200,169,110,.1);
+  margin-bottom:8px;
+}
+.vkb-preview span { color:var(--sepia); }
+
+.vkb-shift-active .vkb-key[data-lower] { /* handled in JS */ }
 </style>
 </head>
 <body>
@@ -883,6 +952,17 @@ body::after {
     cursor:pointer;transition:all .3s;z-index:50;display:flex;align-items:center;gap:8px;">
     ↩ Volver al inicio
   </button>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     TECLADO VIRTUAL
+══════════════════════════════════════ -->
+<div id="vkb">
+  <div class="vkb-preview" id="vkbPreview">
+    <span id="vkbText"></span><span style="opacity:.5">|</span>
+  </div>
+  <div class="vkb-rows" id="vkbRows"></div>
 </div>
 
 <div id="toast"></div>
@@ -1861,6 +1941,159 @@ function proceedToRanking() {
     showNoTop();
   }
 }
+
+
+// ── TECLADO VIRTUAL ───────────────────────────────────
+(function() {
+  const LAYOUTS = {
+    letters: [
+      ['q','w','e','r','t','y','u','i','o','p'],
+      ['a','s','d','f','g','h','j','k','l'],
+      ['⇧','z','x','c','v','b','n','m','⌫'],
+      ['123','@',  ' ','.','OK']
+    ],
+    numbers: [
+      ['1','2','3','4','5','6','7','8','9','0'],
+      ['-','_','.',',','@','#','$','%','&','*'],
+      ['(',')','+','=','!','?','/','\\',':',';'],
+      ['ABC',' ','⌫','OK']
+    ]
+  };
+
+  let activeField  = null;
+  let shifted      = false;
+  let currentLayout = 'letters';
+
+  function buildKeyboard(layout) {
+    const rows = document.getElementById('vkbRows');
+    rows.innerHTML = '';
+    LAYOUTS[layout].forEach((rowKeys, ri) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'vkb-row';
+      rowKeys.forEach(k => {
+        const btn = document.createElement('button');
+        btn.className = 'vkb-key';
+        btn.type = 'button';
+
+        if(k === ' ')  { btn.className += ' space'; btn.textContent = 'ESPACIO'; }
+        else if(k === 'OK')  { btn.className += ' wide action'; btn.textContent = 'OK ✓'; }
+        else if(k === '⌫')  { btn.className += ' wide delete'; btn.textContent = '⌫'; }
+        else if(k === '⇧')  { btn.className += ' wide action'; btn.textContent = '⇧'; }
+        else if(k === '123') { btn.className += ' wide action'; btn.textContent = '123'; }
+        else if(k === 'ABC') { btn.className += ' wide action'; btn.textContent = 'ABC'; }
+        else { btn.textContent = shifted ? k.toUpperCase() : k; }
+
+        btn.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          btn.classList.add('pressed');
+          handleKey(k);
+          setTimeout(() => btn.classList.remove('pressed'), 150);
+        });
+
+        rowEl.appendChild(btn);
+      });
+      rows.appendChild(rowEl);
+    });
+  }
+
+  function handleKey(k) {
+    if(!activeField) return;
+
+    if(k === 'OK') { closeKeyboard(); return; }
+
+    if(k === '⌫') {
+      activeField.value = activeField.value.slice(0,-1);
+      updatePreview();
+      activeField.dispatchEvent(new Event('input', {bubbles:true}));
+      return;
+    }
+
+    if(k === '⇧') {
+      shifted = !shifted;
+      buildKeyboard(currentLayout);
+      return;
+    }
+
+    if(k === '123') {
+      currentLayout = 'numbers';
+      buildKeyboard(currentLayout);
+      return;
+    }
+
+    if(k === 'ABC') {
+      currentLayout = 'letters';
+      buildKeyboard(currentLayout);
+      return;
+    }
+
+    const char = (k === ' ') ? ' ' : (shifted ? k.toUpperCase() : k);
+
+    // Check maxlength
+    const max = parseInt(activeField.getAttribute('maxlength') || '999');
+    if(activeField.value.length < max) {
+      activeField.value += char;
+      if(shifted && k !== ' ') { shifted = false; buildKeyboard(currentLayout); }
+    }
+
+    updatePreview();
+    activeField.dispatchEvent(new Event('input', {bubbles:true}));
+  }
+
+  function updatePreview() {
+    const el = document.getElementById('vkbText');
+    if(el && activeField) el.textContent = activeField.value || '';
+  }
+
+  function openKeyboard(field) {
+    activeField = field;
+    currentLayout = (field.type === 'email') ? 'letters' : 'letters';
+    shifted = false;
+    buildKeyboard(currentLayout);
+    updatePreview();
+    document.getElementById('vkb').classList.add('open');
+    // Scroll field into view above keyboard
+    setTimeout(() => {
+      field.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 350);
+  }
+
+  function closeKeyboard() {
+    document.getElementById('vkb').classList.remove('open');
+    if(activeField) {
+      activeField.blur();
+      activeField = null;
+    }
+  }
+
+  // Attach to all input fields
+  function attachToFields() {
+    document.querySelectorAll('input.field, input[type="email"]').forEach(f => {
+      f.addEventListener('focus', e => {
+        e.preventDefault();
+        openKeyboard(f);
+      });
+      f.readOnly = false;
+    });
+  }
+
+  // Init after DOM ready
+  document.addEventListener('DOMContentLoaded', attachToFields);
+
+  // Also attach when screens change (dynamic fields)
+  const obs = new MutationObserver(() => attachToFields());
+  obs.observe(document.body, { childList:true, subtree:true });
+
+  // Close on outside tap
+  document.addEventListener('pointerdown', e => {
+    const vkb = document.getElementById('vkb');
+    if(vkb && vkb.classList.contains('open') && !vkb.contains(e.target) && !e.target.matches('input')) {
+      closeKeyboard();
+    }
+  });
+
+  // Expose for external use
+  window.VKB = { open: openKeyboard, close: closeKeyboard };
+})();
 
 </script>
 </body>
