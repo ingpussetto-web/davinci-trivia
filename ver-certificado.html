@@ -15,91 +15,54 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    gap: 20px;
+    gap: 16px;
     font-family: 'Cormorant Garamond', serif;
   }
-
-  .header {
-    text-align: center;
-    color: #c8a96e;
-  }
+  .header { text-align:center; }
   .header p {
-    font-family: 'Cinzel', serif;
-    font-size: .7rem;
-    letter-spacing: .3em;
-    text-transform: uppercase;
-    opacity: .7;
-    margin-bottom: 6px;
+    font-family:'Cinzel',serif;
+    font-size:.7rem; letter-spacing:.3em;
+    text-transform:uppercase; color:#c8a96e; opacity:.7; margin-bottom:6px;
   }
   .header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.3rem;
-    color: #f0e6ce;
+    font-family:'Cinzel',serif;
+    font-size:1.2rem; color:#f0e6ce;
   }
-
   .cert-wrap {
-    width: 100%;
-    max-width: 500px;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    width:100%; max-width:500px;
+    border-radius:4px; overflow:hidden;
+    box-shadow:0 8px 40px rgba(0,0,0,.6);
   }
-  .cert-wrap img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
+  .cert-wrap img { width:100%; height:auto; display:block; }
   .loading {
-    color: #c8a96e;
-    font-style: italic;
-    font-size: 1.1rem;
-    text-align: center;
+    color:#c8a96e; font-style:italic;
+    font-size:1.1rem; text-align:center; padding:40px 0;
   }
-
   .btn-save {
-    width: 100%;
-    max-width: 500px;
-    background: linear-gradient(135deg, #8b5a1e, #5c3a10);
-    border: 1px solid rgba(200,169,110,.5);
-    color: #f0e6ce;
-    font-family: 'Cinzel', serif;
-    font-size: 1rem;
-    letter-spacing: .08em;
-    padding: 18px;
-    border-radius: 3px;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    transition: all .3s;
+    width:100%; max-width:500px;
+    background:linear-gradient(135deg,#8b5a1e,#5c3a10);
+    border:1px solid rgba(200,169,110,.5);
+    color:#f0e6ce;
+    font-family:'Cinzel',serif;
+    font-size:1rem; letter-spacing:.08em;
+    padding:18px; border-radius:3px;
+    cursor:pointer; text-decoration:none;
+    text-align:center; display:block;
+    transition:all .3s;
   }
-  .btn-save:hover { background: linear-gradient(135deg, #a06828, #7a4e18); }
-
+  .btn-save:active { background:linear-gradient(135deg,#a06828,#7a4e18); }
   .btn-play {
-    width: 100%;
-    max-width: 500px;
-    background: transparent;
-    border: 1px solid rgba(200,169,110,.25);
-    color: #8b6f47;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    padding: 14px;
-    border-radius: 3px;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    transition: all .3s;
-    font-style: italic;
+    width:100%; max-width:500px;
+    background:transparent;
+    border:1px solid rgba(200,169,110,.2);
+    color:#6b5030; font-family:'Cormorant Garamond',serif;
+    font-size:1rem; padding:13px; border-radius:3px;
+    text-decoration:none; text-align:center; display:block;
+    font-style:italic;
   }
-  .btn-play:hover { color: #c8a96e; border-color: rgba(200,169,110,.4); }
-
   .footer {
-    font-size: .72rem;
-    color: #4a3520;
-    text-align: center;
-    font-style: italic;
+    font-size:.7rem; color:#3a2510;
+    text-align:center; font-style:italic;
   }
 </style>
 </head>
@@ -115,7 +78,7 @@
 </div>
 
 <a id="btnSave" class="btn-save" style="display:none">
-  ⬇ Guardar imagen
+  ⬇ Guardar imagen en el celular
 </a>
 
 <a href="https://ingpussetto-web.github.io/davinci-trivia/" class="btn-play">
@@ -131,37 +94,38 @@
 
   if(nombre) {
     document.getElementById('titulo').textContent = 'Certificado de ' + nombre;
+    document.title = 'Certificado de ' + nombre + ' · Da Vinci';
   }
 
   if(imgUrl) {
     const container = document.getElementById('certContainer');
+    const wrap = document.createElement('div');
+    wrap.className = 'cert-wrap';
     const img = document.createElement('img');
     img.src = imgUrl;
     img.alt = 'Certificado Da Vinci';
-    img.style.borderRadius = '4px';
-    img.style.width = '100%';
-    img.style.boxShadow = '0 8px 40px rgba(0,0,0,.6)';
 
     img.onload = () => {
       container.innerHTML = '';
-      container.appendChild(img);
+      wrap.appendChild(img);
+      container.appendChild(wrap);
 
       // Show save button
       const btn = document.getElementById('btnSave');
       btn.href = imgUrl;
-      btn.download = 'certificado-davinci' + (nombre ? '-' + nombre.toLowerCase().replace(/\s+/g,'-') : '') + '.jpg';
+      btn.download = 'certificado-davinci' + (nombre ? '-' + nombre.toLowerCase().replace(/[^a-z0-9]/gi,'-') : '') + '.jpg';
+      btn.target = '_blank'; // fallback for browsers that block download
       btn.style.display = 'block';
     };
 
     img.onerror = () => {
-      // Image might not be ready yet (GitHub Pages delay)
-      container.innerHTML = '<p class="loading" style="color:#c8a96e">El certificado se está procesando...<br><small style="opacity:.6">Intentá de nuevo en unos segundos</small></p>';
-      // Retry after 3 seconds
-      setTimeout(() => { img.src = imgUrl + '?retry=' + Date.now(); container.innerHTML = ''; container.appendChild(img); }, 3000);
+      container.innerHTML = '<p class="loading" style="color:#c8a96e">No se pudo cargar el certificado.<br><small style="opacity:.6">Intentá recargar la página.</small></p>';
     };
 
     container.innerHTML = '';
-    container.appendChild(img);
+    wrap.appendChild(img);
+    container.appendChild(wrap);
+
   } else {
     document.getElementById('certContainer').innerHTML =
       '<p class="loading" style="color:#7c3a3a">No se encontró el certificado.</p>';
