@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Trivia · Leonardo Da Vinci</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;700;900&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 /* ════════════════════════════════════════
@@ -243,52 +243,61 @@ body::after {
   flex:1; width:100%;
   display:flex; flex-direction:column;
   align-items:center;
-  padding: 28px 28px 24px;
-  gap: 22px;
-  overflow-y:auto;
+  padding: 0;
+  gap: 0;
+  overflow-y:hidden;
+  position:relative;
 }
 
 /* Question number + text */
 .q-num-row {
-  display:flex; align-items:baseline; gap:12px; width:100%;
+  display:flex; align-items:center; gap:10px; width:100%;
+  margin-bottom:0;
 }
 .q-num-big {
   font-family:'Playfair Display', serif;
-  font-size:3rem; color:rgba(200,169,110,.18); line-height:1;
+  font-size:2rem; color:rgba(200,169,110,.2); line-height:1;
   font-style:italic; flex-shrink:0;
 }
-.q-counter { font-size:.75rem; color:var(--faded); letter-spacing:.12em; text-transform:uppercase; }
+.q-counter { font-size:.7rem; color:var(--faded); letter-spacing:.12em; text-transform:uppercase; }
 
 .q-text {
   font-family:'Playfair Display', serif;
-  font-size: clamp(1.1rem, 3.5vw, 1.55rem);
-  line-height: 1.42;
+  font-size: clamp(1rem, 3.2vw, 1.3rem);
+  line-height: 1.35;
   color: var(--parch);
   width:100%;
   text-align:left;
 }
 
-/* Image */
+/* Image — full width, 65vh tall, vertical format */
 .q-img-wrap {
   width:100%;
-  aspect-ratio: 16/9;
-  border-radius: var(--radius);
+  height: 65vh;
+  flex-shrink:0;
   overflow:hidden;
-  border:1px solid rgba(200,169,110,.18);
-  position:relative; flex-shrink:0;
+  position:relative;
 }
 .q-img-wrap img {
   width:100%; height:100%; object-fit:cover;
-  filter:sepia(.25) contrast(1.05);
-  transition:transform 8s ease;
+  object-position: center top;
+  filter:sepia(.15) contrast(1.08) brightness(.9);
+  transition:transform 10s ease;
 }
-.q-img-wrap:hover img { transform:scale(1.04); }
-.q-img-caption {
+.q-img-wrap:hover img { transform:scale(1.03); }
+/* Gradient fade into question area */
+.q-img-wrap::after {
+  content:'';
   position:absolute; bottom:0; left:0; right:0;
-  padding:18px 12px 8px;
-  background:linear-gradient(transparent,rgba(0,0,0,.65));
-  font-size:.68rem; color:rgba(200,169,110,.7);
+  height:40%;
+  background:linear-gradient(transparent, #060402);
+  pointer-events:none;
+}
+.q-img-caption {
+  position:absolute; bottom:6px; left:0; right:0;
+  font-size:.65rem; color:rgba(200,169,110,.55);
   font-style:italic; text-align:center; letter-spacing:.04em;
+  z-index:2;
 }
 
 /* Options */
@@ -298,12 +307,12 @@ body::after {
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(200,169,110,.18);
   border-radius: var(--radius);
-  padding: 15px 18px;
+  padding: 10px 14px;
   cursor:pointer;
   font-family:'Cormorant Garamond', serif;
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: var(--parch);
-  display:flex; align-items:center; gap:14px;
+  display:flex; align-items:center; gap:12px;
   transition: all .22s;
   text-align:left; width:100%;
   position:relative; overflow:hidden;
@@ -328,10 +337,10 @@ body::after {
 .q-opt.disabled { pointer-events:none; opacity:.5; }
 
 .opt-letter {
-  width:28px; height:28px; border-radius:50%;
+  width:24px; height:24px; border-radius:50%;
   border:1px solid rgba(200,169,110,.3);
   display:flex; align-items:center; justify-content:center;
-  font-size:.75rem; color:var(--sepia); flex-shrink:0;
+  font-size:.7rem; color:var(--sepia); flex-shrink:0;
   font-family:'IM Fell English', serif;
 }
 .q-opt.selected .opt-letter {
@@ -678,6 +687,18 @@ body::after {
 
 /* QR Popup */
 #qrPopup.open { display:flex !important; }
+
+/* Question panel — sits below the image */
+.q-panel {
+  width:100%;
+  flex:1;
+  background: linear-gradient(180deg, #060402 0%, #0d0907 100%);
+  border-top:1px solid rgba(200,169,110,.12);
+  display:flex; flex-direction:column;
+  padding: 14px 20px 16px;
+  gap: 10px;
+  overflow-y:auto;
+}
 </style>
 </head>
 <body>
@@ -698,7 +719,7 @@ body::after {
   <p class="w-sub anim d3">Su vida · Su obra · Su genio</p>
   <div class="w-divider anim d3"></div>
 
-  <div class="cam-wrap anim d4">
+  <div class="cam-wrap anim d4" style="display:none"> <!-- MODO TEST: camara oculta -->
     <div class="cam-circle" id="camCircle" onclick="startCamera()">
       <video id="camVideo" autoplay playsinline></video>
       <canvas id="camCanvas"></canvas>
@@ -740,21 +761,22 @@ body::after {
   <div class="q-progress"><div class="q-progress-fill" id="qFill" style="width:0%"></div></div>
 
   <div class="q-body" id="qBody">
-    <div class="q-num-row">
-      <div class="q-num-big" id="qNumBig">01</div>
-      <div class="q-counter">Pregunta <span id="qNumText">1</span> de <span id="qTotal">10</span></div>
-    </div>
-
-    <p class="q-text" id="qText"></p>
-
+    <!-- Image — top 65% -->
     <div class="q-img-wrap" id="qImgWrap">
       <img id="qImg" src="" alt="" onerror="imgErr(this)" crossorigin="anonymous">
       <div class="q-img-caption" id="qCaption"></div>
     </div>
 
-    <div class="q-options" id="qOptions"></div>
-
-    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+    <!-- Question panel — bottom 35% -->
+    <div class="q-panel">
+      <div class="q-num-row">
+        <div class="q-num-big" id="qNumBig">01</div>
+        <div class="q-counter">Pregunta <span id="qNumText">1</span> de <span id="qTotal">6</span></div>
+      </div>
+      <p class="q-text" id="qText"></p>
+      <div class="q-options" id="qOptions"></div>
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+    </div>
   </div>
 </div>
 
@@ -1218,7 +1240,7 @@ function stopCamera() {
 
 function checkReady() {
   const name = document.getElementById('inputName').value.trim();
-  document.getElementById('btnStart').disabled = !(name.length>=2 && S.photo);
+  document.getElementById('btnStart').disabled = !(name.length>=2); // MODO TEST: sin foto
 }
 
 // ══════════════════════════════════════════════════
@@ -1239,7 +1261,7 @@ function startGame() {
 
   // Setup header
   document.getElementById('topName').textContent = S.name;
-  if(S.photo) document.getElementById('topAvatar').src = S.photo;
+  document.getElementById('topAvatar').src = S.photo || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><circle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23c8a96e%22 opacity=%22.3%22/><text x=%2220%22 y=%2225%22 text-anchor=%22middle%22 font-size=%2216%22 fill=%22%23c8a96e%22>✦</text></svg>';
   document.getElementById('qTotal').textContent = QUESTIONS_PER_GAME;
 
   showScreen('s-question');
@@ -1664,6 +1686,15 @@ function getRomanDate() {
 
 function showCertificate() {
   showScreen('s-cert');
+
+  // Preload Cinzel fonts before drawing canvas
+  Promise.all([
+    document.fonts.load('900 72px "Cinzel"'),
+    document.fonts.load('700 72px "Cinzel Decorative"'),
+  ]).then(() => drawCertificate()).catch(() => drawCertificate());
+}
+
+function drawCertificate() {
   const canvas = document.getElementById('certCanvas');
   const ctx    = canvas.getContext('2d');
   const img    = new Image();
@@ -1671,65 +1702,81 @@ function showCertificate() {
   img.onload = () => {
     canvas.width  = CERT_W;
     canvas.height = CERT_H;
-    // Draw base certificate
     ctx.drawImage(img, 0, 0, CERT_W, CERT_H);
 
     const grado = getGrado(S.score, QUESTIONS_PER_GAME);
-    const cx    = CERT_W / 2;
 
-    // Helper: draw text matching certificate style
-    function drawField(text, yPct, sizePct, color, style) {
-      const fontSize = Math.round(CERT_W * sizePct);
+    // ── HELPER ────────────────────────────────────────
+    function txt(text, x, y, font, color, shadow) {
       ctx.save();
-      ctx.font         = (style||'bold') + ' ' + fontSize + 'px Georgia, serif';
-      ctx.fillStyle    = color || '#2a1005';
+      ctx.font         = font;
+      ctx.fillStyle    = color || '#1e0b03';
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.shadowColor  = 'rgba(0,0,0,.08)';
-      ctx.shadowBlur   = 3;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.fillText(text, cx, Math.round(CERT_H * yPct));
+      if(shadow) {
+        ctx.shadowColor   = 'rgba(0,0,0,.12)';
+        ctx.shadowBlur    = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+      }
+      ctx.fillText(text, x, y);
       ctx.restore();
     }
 
-    // Fit name to width if too long
-    function fitText(ctx, text, maxW, baseSize) {
-      ctx.font = 'bold ' + baseSize + 'px Georgia, serif';
-      while(ctx.measureText(text).width > maxW && baseSize > 20) {
-        baseSize -= 2;
-        ctx.font = 'bold ' + baseSize + 'px Georgia, serif';
-      }
-      return baseSize;
+    // ── NAME ──────────────────────────────────────────
+    // Field 1: center=(697, 467), available width=667px, field height=65px
+    // Max font = 70% of field height = ~46px
+    // Auto-fit so longest name (Maximiliano) fits within 667px
+    const nameAvailW = 667;
+    const nameMaxPx  = 46;
+    const nameMinPx  = 18;
+    const nameText   = S.name.toUpperCase();
+    let nameSize = nameMaxPx;
+    ctx.font = '900 ' + nameSize + 'px "Cinzel", serif';
+    while(ctx.measureText(nameText).width > nameAvailW && nameSize > nameMinPx) {
+      nameSize--;
+      ctx.font = '900 ' + nameSize + 'px "Cinzel", serif';
     }
+    txt(nameText, 697, 467, '900 ' + nameSize + 'px "Cinzel", serif', '#1e0b03', true);
 
-    // Name — auto-fit size
-    const nameMaxW  = CERT_W * 0.55;
-    const nameSize  = fitText(ctx, S.name.toUpperCase(), nameMaxW, Math.round(CERT_W * ZONES.name.size));
-    ctx.save();
-    ctx.font         = 'bold ' + nameSize + 'px Georgia, serif';
-    ctx.fillStyle    = '#2a1005';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor  = 'rgba(0,0,0,.1)';
-    ctx.shadowBlur   = 2;
-    ctx.fillText(S.name.toUpperCase(), cx, Math.round(CERT_H * ZONES.name.y));
-    ctx.restore();
+    // ── GRADE ─────────────────────────────────────────
+    // Field 2: center Y=608, height=128px
+    // Font = 55% of field height = ~70px → but grade words are longer
+    // Use Cinzel Decorative, auto-fit to available width too
+    const gradeAvailW = 600;
+    const gradeMaxPx  = 52;
+    const gradeMinPx  = 20;
+    const gradeText   = grado.it.toUpperCase();
+    let gradeSize = gradeMaxPx;
+    ctx.font = '700 ' + gradeSize + 'px "Cinzel Decorative", serif';
+    while(ctx.measureText(gradeText).width > gradeAvailW && gradeSize > gradeMinPx) {
+      gradeSize--;
+      ctx.font = '700 ' + gradeSize + 'px "Cinzel Decorative", serif';
+    }
+    txt(gradeText, 700, 549, '700 ' + gradeSize + 'px "Cinzel Decorative", serif', '#6b1204', true);
 
-    // Grade
-    const gradeSize = Math.round(CERT_W * ZONES.grade.size);
-    ctx.save();
-    ctx.font         = 'bold ' + gradeSize + 'px Georgia, serif';
-    ctx.fillStyle    = '#6b1a04';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor  = 'rgba(100,20,0,.15)';
-    ctx.shadowBlur   = 3;
-    ctx.fillText(grado.it.toUpperCase(), cx, Math.round(CERT_H * ZONES.grade.y));
-    ctx.restore();
+    // ── DATE — 3 inline fields ─────────────────────────
+    // Line Y = 692
+    // Day X=433, Month X=701, Year X=1049
+    const d      = new Date();
+    const months = ['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii',
+                    'Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
+    const toRoman = n => {
+      const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+      const s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+      let r=''; for(let i=0;i<v.length;i++) while(n>=v[i]){r+=s[i];n-=v[i];} return r;
+    };
+    const dayRoman  = toRoman(d.getDate());
+    const monthName = months[d.getMonth()];
+    const yearRoman = toRoman(d.getFullYear());
+    const dateSize  = 22;
+    const dateFont  = '600 ' + dateSize + 'px "Cinzel", serif';
+    const dateColor = '#2a1505';
+    const dateY     = 728;
 
-    // Date line
-    drawField('Dato il ' + getRomanDate(), ZONES.date.y, ZONES.date.size, '#3a2010', 'italic');
+    txt(dayRoman,  480,  dateY, dateFont, dateColor, false);
+    txt(monthName, 620,  dateY, dateFont, dateColor, false);
+    txt(yearRoman, 970,  dateY, dateFont, dateColor, false);
   };
   img.onerror = () => toast('Error cargando el certificado');
   img.src = CERT_IMG_URL + '?t=' + Date.now();

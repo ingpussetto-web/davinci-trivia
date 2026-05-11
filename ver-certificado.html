@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tu Certificado · Da Vinci</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #0d0804;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .header {
+    text-align: center;
+    color: #c8a96e;
+  }
+  .header p {
+    font-family: 'Cinzel', serif;
+    font-size: .7rem;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    opacity: .7;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: #f0e6ce;
+  }
+
+  .cert-wrap {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.6);
+  }
+  .cert-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .loading {
+    color: #c8a96e;
+    font-style: italic;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .btn-save {
+    width: 100%;
+    max-width: 500px;
+    background: linear-gradient(135deg, #8b5a1e, #5c3a10);
+    border: 1px solid rgba(200,169,110,.5);
+    color: #f0e6ce;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: .08em;
+    padding: 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    transition: all .3s;
+  }
+  .btn-save:hover { background: linear-gradient(135deg, #a06828, #7a4e18); }
+
+  .btn-play {
+    width: 100%;
+    max-width: 500px;
+    background: transparent;
+    border: 1px solid rgba(200,169,110,.25);
+    color: #8b6f47;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    padding: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    transition: all .3s;
+    font-style: italic;
+  }
+  .btn-play:hover { color: #c8a96e; border-color: rgba(200,169,110,.4); }
+
+  .footer {
+    font-size: .72rem;
+    color: #4a3520;
+    text-align: center;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p>Trivia · Leonardo da Vinci</p>
+  <h1 id="titulo">Tu Certificado</h1>
+</div>
+
+<div id="certContainer">
+  <p class="loading">Cargando certificado...</p>
+</div>
+
+<a id="btnSave" class="btn-save" style="display:none">
+  ⬇ Guardar imagen
+</a>
+
+<a href="https://ingpussetto-web.github.io/davinci-trivia/" class="btn-play">
+  ¿Querés jugar vos también? →
+</a>
+
+<p class="footer">Totem Nube · Experiencias Interactivas</p>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const imgUrl = params.get('img');
+  const nombre = params.get('nombre');
+
+  if(nombre) {
+    document.getElementById('titulo').textContent = 'Certificado de ' + nombre;
+  }
+
+  if(imgUrl) {
+    const container = document.getElementById('certContainer');
+    const img = document.createElement('img');
+    img.src = imgUrl;
+    img.alt = 'Certificado Da Vinci';
+    img.style.borderRadius = '4px';
+    img.style.width = '100%';
+    img.style.boxShadow = '0 8px 40px rgba(0,0,0,.6)';
+
+    img.onload = () => {
+      container.innerHTML = '';
+      container.appendChild(img);
+
+      // Show save button
+      const btn = document.getElementById('btnSave');
+      btn.href = imgUrl;
+      btn.download = 'certificado-davinci' + (nombre ? '-' + nombre.toLowerCase().replace(/\s+/g,'-') : '') + '.jpg';
+      btn.style.display = 'block';
+    };
+
+    img.onerror = () => {
+      // Image might not be ready yet (GitHub Pages delay)
+      container.innerHTML = '<p class="loading" style="color:#c8a96e">El certificado se está procesando...<br><small style="opacity:.6">Intentá de nuevo en unos segundos</small></p>';
+      // Retry after 3 seconds
+      setTimeout(() => { img.src = imgUrl + '?retry=' + Date.now(); container.innerHTML = ''; container.appendChild(img); }, 3000);
+    };
+
+    container.innerHTML = '';
+    container.appendChild(img);
+  } else {
+    document.getElementById('certContainer').innerHTML =
+      '<p class="loading" style="color:#7c3a3a">No se encontró el certificado.</p>';
+  }
+</script>
+</body>
+</html>
