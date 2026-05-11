@@ -1791,90 +1791,51 @@ async function showQRPopup() {
   const popup = document.getElementById('qrPopup');
   popup.style.display = 'flex';
 
-  // Show loading in QR canvas
   const qrCanvas = document.getElementById('qrCanvas');
   const ctx = qrCanvas.getContext('2d');
-  ctx.fillStyle = '#f5f5f5';
+  ctx.fillStyle = '#f0f0f0';
   ctx.fillRect(0,0,200,200);
-  ctx.fillStyle = '#555';
-  ctx.font = '13px sans-serif';
+  ctx.fillStyle = '#888';
+  ctx.font = '14px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('Subiendo...', 100, 100);
+  ctx.fillText('Generando...', 100, 100);
 
   try {
+    // Get canvas as base64
     const certCanvas = document.getElementById('certCanvas');
-    // Use toBlob to avoid CORS taint issues
-    const base64 = await new Promise((resolve, reject) => {
-      try {
-        const data = certCanvas.toDataURL('image/jpeg', 0.88).split(',')[1];
-        resolve(data);
-      } catch(e) {
-        // Canvas tainted - redraw without crossOrigin
-        const c2  = document.createElement('canvas');
-        c2.width  = certCanvas.width;
-        c2.height = certCanvas.height;
-        const ctx2 = c2.getContext('2d');
-        const img2 = new Image();
-        img2.onload = () => {
-          ctx2.drawImage(img2, 0, 0);
-          // Redraw text
-          const grado = getGrado(S.score, QUESTIONS_PER_GAME);
-          const cx = c2.width / 2;
-          function t(text, x, y, font, color) {
-            ctx2.save(); ctx2.font=font; ctx2.fillStyle=color;
-            ctx2.textAlign='center'; ctx2.textBaseline='middle';
-            ctx2.fillText(text,x,y); ctx2.restore();
-          }
-          const nameAvailW=667, nameMaxPx=46, nameMinPx=18;
-          const nameText=S.name.toUpperCase();
-          let ns=nameMaxPx;
-          ctx2.font='900 '+ns+'px "Cinzel",serif';
-          while(ctx2.measureText(nameText).width>nameAvailW&&ns>nameMinPx){ns--;ctx2.font='900 '+ns+'px "Cinzel",serif';}
-          t(nameText,697,467,'900 '+ns+'px "Cinzel",serif','#1e0b03');
-          const gText=grado.it.toUpperCase();
-          let gs=52; ctx2.font='700 '+gs+'px "Cinzel Decorative",serif';
-          while(ctx2.measureText(gText).width>600&&gs>20){gs--;ctx2.font='700 '+gs+'px "Cinzel Decorative",serif';}
-          t(gText,700,549,'700 '+gs+'px "Cinzel Decorative",serif','#6b1204');
-          const d=new Date();
-          const months=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
-          const toRoman=n=>{const v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];let r='';for(let i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
-          const df='600 22px "Cinzel",serif', dc='#2a1505', dy=728;
-          t(toRoman(d.getDate()),480,dy,df,dc);
-          t(months[d.getMonth()],620,dy,df,dc);
-          t(toRoman(d.getFullYear()),970,dy,df,dc);
-          resolve(c2.toDataURL('image/jpeg',0.88).split(',')[1]);
-        };
-        img2.src = CERT_IMG_URL;
-      }
-    });
-    const filename   = 'cert-' + Date.now() + '.jpg';
-    const apiUrl     = 'https://api.github.com/repos/ingpussetto-web/davinci-trivia/contents/img/certificados/' + filename;
+    const base64 = certCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    const filename = 'cert-' + Date.now() + '.jpg';
 
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify({
-        message: 'Cert ' + S.name,
-        content: base64,
-        branch: 'main'
-      })
+    // Use GET request with data encoded — avoids CORS preflight
+    const gasUrl = GAS_URL
+      + '?action=uploadCert'
+      + '&filename=' + encodeURIComponent(filename)
+      + '&nombre='   + encodeURIComponent(S.name);
+
+    // POST via form submission trick to avoid CORS
+    const res = await fetch(GAS_URL + '?action=uploadCert&filename=' + encodeURIComponent(filename) + '&nombre=' + encodeURIComponent(S.name), {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: base64
     });
 
-    if(!res.ok) throw new Error('Upload failed: ' + res.status);
-
+    // Since no-cors returns opaque response, we assume success and build URL
     const certUrl   = 'https://ingpussetto-web.github.io/davinci-trivia/img/certificados/' + filename;
-    const viewerUrl = 'https://ingpussetto-web.github.io/davinci-trivia/ver-certificado.html?img=' + encodeURIComponent(certUrl) + '&nombre=' + encodeURIComponent(S.name);
-    drawQR(qrCanvas, viewerUrl, 200);
+    const viewerUrl = 'https://ingpussetto-web.github.io/davinci-trivia/ver-certificado.html?img='
+                    + encodeURIComponent(certUrl) + '&nombre=' + encodeURIComponent(S.name);
+
+    // Wait 3 seconds for GAS to process then show QR
+    setTimeout(() => {
+      drawQR(qrCanvas, viewerUrl, 200);
+      toast('✓ Escaneá el QR para ver tu certificado');
+    }, 3000);
 
   } catch(err) {
-    console.error(err);
+    console.error('QR error:', err);
     drawQR(qrCanvas, 'https://ingpussetto-web.github.io/davinci-trivia/', 200);
-    toast('No se pudo subir el certificado');
+    toast('Error: ' + err.message);
   }
 }
 
