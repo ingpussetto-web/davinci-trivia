@@ -1328,6 +1328,7 @@ function checkReady() {
 //  GAME FLOW
 // ══════════════════════════════════════════════════
 function startGame() {
+  clearInterval(countdownTimer); countdownTimer = null; // cancelar countdown anterior
   S.name    = document.getElementById('inputName').value.trim();
   S.score   = 0; S.current = 0; S.answers = []; S.startTime = Date.now();
   // Shuffle garantizando 50% con imagen real
@@ -1774,7 +1775,7 @@ function getRomanDate() {
 }
 
 function showCertificate() {
-  clearInterval(countdownTimer); countdownTimer = null;
+  clearInterval(countdownTimer); countdownTimer = null; // detener countdown ranking
   showScreen('s-cert');
 
   // Preload Cinzel fonts before drawing canvas
