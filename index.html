@@ -1643,6 +1643,7 @@ function showNoTop() {
 // ══════════════════════════════════════════════════
 function restart() {
   clearInterval(countdownTimer);
+  countdownTimer = null;
   stopCamera();
 
   S = { name:'', photo:null, email:'', questions:[], current:0, score:0, answers:[], answered:false, ranking:[] };
@@ -1765,6 +1766,7 @@ function getRomanDate() {
 }
 
 function showCertificate() {
+  clearInterval(countdownTimer); countdownTimer = null;
   showScreen('s-cert');
 
   // Preload Cinzel fonts before drawing canvas
@@ -1917,6 +1919,7 @@ async function showQRPopup() {
 }
 
 function closeQRPopup() {
+  clearInterval(countdownTimer); countdownTimer = null;
   document.getElementById('qrPopup').style.display = 'none';
   proceedToRanking();
 }
