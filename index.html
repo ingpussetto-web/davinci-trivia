@@ -356,11 +356,12 @@ body::after {
   font-family:'Playfair Display', serif;
   font-size:1rem; letter-spacing:.08em;
   padding:16px; border-radius:var(--radius);
-  cursor:pointer; transition:all .3s;
-  opacity:0; pointer-events:none;
+  cursor:pointer; transition:opacity .3s;
+  opacity:0; pointer-events:none !important;
   margin-top:4px;
+  visibility: hidden;
 }
-.btn-next.visible { opacity:1; pointer-events:all; }
+.btn-next.visible { opacity:1; pointer-events:all !important; visibility:visible; }
 .btn-next:hover { background:linear-gradient(135deg,rgba(160,104,40,.8),rgba(120,76,24,.8)); }
 
 /* ════════════════════════════════════════
@@ -1382,9 +1383,12 @@ function loadQuestion() {
     optsEl.appendChild(btn);
   });
 
-  // Next button
+  // Next button — fully hidden until answer selected
   const btnNext = document.getElementById('btnNext');
   btnNext.classList.remove('visible');
+  btnNext.style.opacity = '0';
+  btnNext.style.pointerEvents = 'none';
+  btnNext.style.visibility = 'hidden';
   btnNext.textContent = idx === QUESTIONS_PER_GAME-1 ? 'Ver resultado →' : 'Siguiente →';
 }
 
@@ -1409,7 +1413,11 @@ function selectOpt(btn, shuffled) {
   });
 
   // Score hidden during game — shown at end
-  document.getElementById('btnNext').classList.add('visible');
+  const next = document.getElementById('btnNext');
+  next.classList.add('visible');
+  next.style.opacity = '1';
+  next.style.pointerEvents = 'all';
+  next.style.visibility = 'visible';
 }
 
 function nextQuestion() {
