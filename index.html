@@ -2079,12 +2079,12 @@ function proceedToRanking() {
     });
   }
 
-  // Init after DOM ready
-  document.addEventListener('DOMContentLoaded', attachToFields);
-
-  // Also attach when screens change (dynamic fields)
-  const obs = new MutationObserver(() => attachToFields());
-  obs.observe(document.body, { childList:true, subtree:true });
+  // Init after DOM ready — attach once, no MutationObserver needed
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachToFields);
+  } else {
+    attachToFields();
+  }
 
   // Close on outside tap
   document.addEventListener('pointerdown', e => {
